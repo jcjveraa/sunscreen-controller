@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <!-- <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"> -->
+
+    <link rel="stylesheet" type="text/css" href="./bootstrap.min.css">
+
+    <title>Sunscreen controller</title>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Sunscreen controller</h2>
+
+        <button class="btn btn-success btn-lg btn-block" id="button-open">Open</button>
+        <button class="btn btn-danger btn-lg btn-block" id="button-close">Close</button>
+        <button class="btn btn-secondary btn-lg btn-block" id="button-current">Get current position</button>
+
+        <div id="result"></div>
+        <div class="text-center">
+            <img src="sun.png" class="img-fluid" alt="Sun">
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+
+
+    <script>
+        function GetURLParameter(sParam) {
+            var sPageURL = window.location.search.substring(1);
+            var sURLVariables = sPageURL.split('&');
+            for (var i = 0; i < sURLVariables.length; i++) {
+                var sParameterName = sURLVariables[i].split('=');
+                if (sParameterName[0] == sParam) {
+                    return sParameterName[1];
+                }
+            }
+        }
+
+        function updateResult(data) {
+            $("#result").html(data);
+        }
+        let key = GetURLParameter('key');
+
+        function openClose(direction) {
+            let url = "./Operate?direction=" + direction + "&key=" + key
+            $.get(url, updateResult);
+        }
+
+        $("#button-open").click(function () {
+            openClose("Open")
+        }
+        );
+
+        $("#button-close").click(function () {
+            openClose("Close")
+        }
+        );
+
+        $("#button-current").click(function () {
+            $.get("./CurrentPosition?key=" + key, updateResult);
+        }
+        );
+    </script>
+</body>
+
+</html>
