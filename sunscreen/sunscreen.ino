@@ -5,7 +5,7 @@
 #include <ESP8266WebServer.h>
 #include <WiFiClient.h>
 #include "SuperSecretSettings.h" // File containing const char*'s for SSID & PASSWORD & KEY
-#include <FS.h>                      // Include the SPIFFS library
+#include <FS.h>                  // Include the SPIFFS library
 
 // using https://github.com/vdwel/switchKaKu
 #include <switchKaKu.h>
@@ -15,6 +15,9 @@
 ESP8266WebServer server(80);
 
 bool currentPositionOpen = false;
+const static String openWeatherAPI = "https://api.openweathermap.org/data/2.5/onecall?lat=" + LAT + "&lon=" + LON + "&appid=" + OPENWEATHERMAP_ORG_KEY;
+
+long lastUpdateTime = 0;
 
 void setup()
 {
