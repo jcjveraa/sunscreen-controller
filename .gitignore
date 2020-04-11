@@ -38,3 +38,5 @@ SuperSecretSettings.h
 # vscode
 .vscode/*
 build/*
+
+sunscreen/data/*

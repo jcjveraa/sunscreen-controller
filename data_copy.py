@@ -1,11 +1,21 @@
 import os
 import shutil
+import gzip
 
 data_dir = './sunscreen/data'
-source_dir = './sunscreen/data_raw'
+source_dir = './sunscreen/data-raw'
 
-shutil.rmtree('./sunscreen/data')
-os.mkdir('sunscreen/data')
+# Clean the data dir
+try:
+    shutil.rmtree(data_dir)
+except:
+    pass
 
-for filename in os.listdir('sunscreen/data'):
-    os.remove
+os.mkdir(data_dir)
+
+# Write all minified files to the data dir
+for filename in os.listdir(source_dir):
+    if ((filename.find('.min.') != -1) or (filename.find('.png') != -1)):
+        with open(source_dir + '/' + filename, 'rb') as f_in:
+            with gzip.open(data_dir + '/' +filename+'.gz', 'wb') as f_out:
+                shutil.copyfileobj(f_in, f_out)

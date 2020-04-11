@@ -15,9 +15,9 @@
 ESP8266WebServer server(80);
 
 bool currentPositionOpen = false;
-const static String openWeatherAPI = "https://api.openweathermap.org/data/2.5/onecall?lat=" + LAT + "&lon=" + LON + "&appid=" + OPENWEATHERMAP_ORG_KEY;
+const static String openWeatherAPI = "https://api.openweathermap.org/data/2.5/onecall?lat=" + String(LAT) + "&lon=" + String(LON) + "&appid=" + String(OPENWEATHERMAP_ORG_KEY);
 
-long lastUpdateTime = 0;
+long lastUpdateTimestamp = 0;
 
 void setup()
 {
@@ -66,10 +66,11 @@ void handleOpenClose()
 {
     if (checkKey())
     {
-        if (checkArg("direction"))
+        if (checkArg("direction") && checkArg("timestamp"))
         {
             currentPositionOpen = server.arg("direction") == "Open";           // Default to the safe 'Close' option
             switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, currentPositionOpen, 1); //switch group 1, device 1, repeat 3, on
+            lastUpdateTimestamp = server.arg("timestamp").toInt();
             server.send(200, "text/plain", "Sending command: " + server.arg("direction"));
         }
     }
@@ -80,7 +81,9 @@ void handleGetCurrentPosition()
     if (checkKey())
     {
         String position = currentPositionOpen ? "Open" : "Closed";
-        server.send(200, "text/plain", "{\"position\": \"" + position + "\"} " + server.arg("direction"));
+        server.send(200, "application/json", "{\"position\": \"" + position + "\""
+        +",\"lastUpdateTimestamp\": \"" + lastUpdateTimestamp + "\""+
+        "} ");
     }
 }
 
