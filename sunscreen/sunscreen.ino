@@ -51,6 +51,7 @@ void setup()
 
     server.on("/Operate", handleOpenClose);
     server.on("/CurrentPosition", handleGetCurrentPosition);
+    server.on("/listFiles", handleFileList);
 
     server.begin(); // Actually start the server
 
@@ -84,6 +85,36 @@ void handleGetCurrentPosition()
         Serial.print("Handling handleGetCurrentPosition()\n");
         String position = currentPositionOpen ? "Open" : "Closed";
         server.send(200, "application/json", "{\"position\": \"" + position + "\"" + ",\"lastUpdateTimestamp\": \"" + lastUpdateTimestamp + "\"" + "} ");
+    }
+}
+
+// inspired by https://www.youtube.com/watch?v=QLGwI5tC9yk
+void handleFileList()
+{
+    if (checkKey())
+    {
+        Serial.print("Handling handleGetCurrentPosition()\n");
+        String path = "/";
+        Dir dir = SPIFFS.openDir(path);
+        String output = "{\"files\": [\"";
+        bool firstFile = false;
+        while (dir.next())
+        {
+            File entry = dir.openFile("r");
+            if (!firstFile)
+            {
+                output += "\",\"";
+            }
+            else
+            {
+                firstFile = true;
+            }
+            output += String(entry.name()).substring(1); // Start at idx 1 to skip single /
+            entry.close();
+        }
+        output += "\"]}";
+        server.send(200, "application/json", output);
+        Serial.print("sending: " + output + "\n");
     }
 }
 
