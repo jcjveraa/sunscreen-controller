@@ -19,6 +19,8 @@ const static String openWeatherAPI = "https://api.openweathermap.org/data/2.5/on
 
 long lastUpdateTimestamp = 0;
 
+File uploadFile;
+
 void setup()
 {
     Serial.begin(115200);
@@ -51,7 +53,9 @@ void setup()
 
     server.on("/Operate", handleOpenClose);
     server.on("/CurrentPosition", handleGetCurrentPosition);
-    server.on("/listFiles", handleFileList);
+    server.on("/files", HTTP_GET, handleFileList);
+    server.on(
+        "/files", HTTP_POST, [] { server.send(200, "application/json", "{\"fileupload\":1}"); }, handleFileUpload);
 
     server.begin(); // Actually start the server
 
@@ -73,7 +77,7 @@ void handleOpenClose()
             switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, currentPositionOpen, 3); //switch group 1, device 1, repeat 3, on
             lastUpdateTimestamp = server.arg("timestamp").toInt();
             Serial.print("Setting to position " + server.arg("direction") + " \n");
-            server.send(200, "text/plain", "Sending command: " + server.arg("direction"));
+            server.send(200, "application/json", "{\"command_received\":\"" + server.arg("direction") + "\"}");
         }
     }
 }
@@ -115,6 +119,46 @@ void handleFileList()
         output += "\"]}";
         server.send(200, "application/json", output);
         Serial.print("sending: " + output + "\n");
+    }
+}
+
+void handleFileUpload()
+{
+    if (checkKey())
+    {
+        HTTPUpload &upload = server.upload();
+        String filename = upload.filename;
+        if (upload.status == UPLOAD_FILE_START)
+        {
+
+            if (!filename.startsWith("/"))
+            {
+                filename = "/" + filename;
+            }
+            Serial.println("Handling fileupload for file " + filename);
+            uploadFile = SPIFFS.open(filename, "w");
+        }
+        else if (upload.status == UPLOAD_FILE_WRITE)
+        {
+            if (uploadFile)
+            {
+                uploadFile.write(upload.buf, upload.currentSize);
+                Serial.println("Handling fileupload for file " + filename + " start write!");
+            }
+            else
+                Serial.println("Handling fileupload for file " + filename + " failed in step UPLOAD_FILE_WRITE!");
+        }
+        else if (upload.status == UPLOAD_FILE_END)
+        {
+            if (uploadFile)
+            {
+                uploadFile.close();
+                Serial.println("Handling fileupload for file " + filename + " complete!");
+                Serial.println(String(upload.totalSize) + " bytes written.");
+            }
+            else
+                Serial.println("Handling fileupload for file " + filename + " failed in step UPLOAD_FILE_END!");
+        }
     }
 }
 
