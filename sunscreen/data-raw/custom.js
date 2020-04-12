@@ -15,7 +15,7 @@ function updateResult(data) {
 let key = GetURLParameter('key');
 
 function openClose(direction) {
-    let url = "./Operate?direction=" + direction + "&key=" + key
+    let url = "./Operate?direction=" + direction + "&key=" + key + "&timestamp=" + Date.now();
     $.get(url, updateResult);
 }
 

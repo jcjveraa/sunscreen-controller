@@ -10,7 +10,7 @@
 // using https://github.com/vdwel/switchKaKu
 #include <switchKaKu.h>
 #define TRANSMITTERID1 34107862 // Randomly chosen
-#define KAKUPIN 1
+#define KAKUPIN D6
 
 ESP8266WebServer server(80);
 
@@ -69,8 +69,9 @@ void handleOpenClose()
         if (checkArg("direction") && checkArg("timestamp"))
         {
             currentPositionOpen = server.arg("direction") == "Open";           // Default to the safe 'Close' option
-            switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, currentPositionOpen, 1); //switch group 1, device 1, repeat 3, on
+            switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, currentPositionOpen, 3); //switch group 1, device 1, repeat 3, on
             lastUpdateTimestamp = server.arg("timestamp").toInt();
+            Serial.print("Setting to position " + server.arg("direction") + " \n");
             server.send(200, "text/plain", "Sending command: " + server.arg("direction"));
         }
     }
@@ -80,10 +81,9 @@ void handleGetCurrentPosition()
 {
     if (checkKey())
     {
+        Serial.print("Handling handleGetCurrentPosition()\n");
         String position = currentPositionOpen ? "Open" : "Closed";
-        server.send(200, "application/json", "{\"position\": \"" + position + "\""
-        +",\"lastUpdateTimestamp\": \"" + lastUpdateTimestamp + "\""+
-        "} ");
+        server.send(200, "application/json", "{\"position\": \"" + position + "\"" + ",\"lastUpdateTimestamp\": \"" + lastUpdateTimestamp + "\"" + "} ");
     }
 }
 
@@ -94,10 +94,12 @@ bool checkKey()
         bool keycheck = server.arg("key") == KEY; // KEY to be defined somewhere safe
         if (keycheck)
         {
+            Serial.print("Correct key provided\n");
             return true;
         }
         else
         {
+            Serial.print("Incorrect key provided!\n");
             server.send(403, "text/plain", "Hax!"); // KEY Invalid
             return false;
         }
@@ -108,8 +110,13 @@ bool checkArg(String arg)
 {
     if (!server.hasArg(arg))
     {
+        Serial.print("Argument " + arg + " was not supplied\n");
         server.send(400, "text/plain", "Invalid parameters");
+        return false;
     }
+
+    // All good!
+    return true;
 }
 
 // from https://tttapa.github.io/ESP8266/Chap11%20-%20SPIFFS.html
