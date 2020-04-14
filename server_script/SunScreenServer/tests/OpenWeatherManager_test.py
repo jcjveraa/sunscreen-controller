@@ -1,6 +1,6 @@
 import unittest
 
-from Opimport OpenWeatherManager
+
 
 
 class OWMTest(unittest.TestCase):
