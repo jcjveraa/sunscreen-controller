@@ -11,6 +11,7 @@
 #include <switchKaKu.h>
 #define TRANSMITTERID1 34107862 // Randomly chosen
 #define KAKUPIN D6
+#define LED_PIN D4
 
 ESP8266WebServer server(80);
 
@@ -26,13 +27,15 @@ void setup()
     Serial.begin(115200);
     Serial.println();
 
-    Serial.printf("Connecting to %s ", SSID);
-    WiFi.begin(SSID, PASSWORD);
+    Serial.printf("Connecting to %s ", SSID_1);
+    WiFi.begin(SSID_1, PASSWORD_1);
     while (WiFi.status() != WL_CONNECTED)
     {
         delay(500);
         Serial.print(".");
+        digitalWrite(LED_PIN, !digitalRead(LED_PIN));
     }
+    digitalWrite(LED_PIN, LOW);
     Serial.println(" connected");
 
     if (MDNS.begin("esp8266-sunscreen.local"))

@@ -37,9 +37,9 @@ SuperSecretSettings.h
 
 # vscode
 .vscode/*
-build/*
+esp8266/build/*
 
-# */sunscreen/data/*
+*/sunscreen/data/*
 
 secrets.json
 

@@ -1,9 +1,12 @@
 import unittest
-from src.OpenWeatherManager import OpenWeatherManager
+
+from Opimport OpenWeatherManager
+
 
 class OWMTest(unittest.TestCase):
 
     def test_Kelvin_to_Celcius(self):
+        OpenWeatherManager
         owm = OpenWeatherManager()
         self.assertEqual(owm.kelvin_to_celcius(0), -273.15)
         self.assertNotEqual(owm.kelvin_to_celcius(1), -270.15)
