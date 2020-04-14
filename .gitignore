@@ -39,7 +39,7 @@ SuperSecretSettings.h
 .vscode/*
 build/*
 
-sunscreen/data/*
+*/sunscreen/data/*
 
 secrets.json
 
