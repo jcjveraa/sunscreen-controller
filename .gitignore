@@ -43,4 +43,4 @@ esp8266/build/*
 
 secrets.json
 
-server_script/__pycache__
+8__pycache__/*
