@@ -1,5 +1,8 @@
 import unittest
 from SunScreenServer import OpenWeatherManager
+import json, os
+import time
+fileDir = os.path.dirname(os.path.abspath(__file__))
 class OWMTest(unittest.TestCase):
 
     def test_Kelvin_to_Celcius(self):
@@ -7,13 +10,14 @@ class OWMTest(unittest.TestCase):
         self.assertNotEqual(OpenWeatherManager.kelvin_to_celcius(1), -270.15)
 
     def test_is_current_check(self):
-        json = OpenWeatherManager.get_Open_Weather_JSON()
-        self.assertTrue(OpenWeatherManager.is_current(json))
-        self.assertFalse(OpenWeatherManager.is_current(json, -(5*60)))
+        OWjson = json.load(open(os.path.join(fileDir, 'onecall.json')))
+        OWjson['current']['dt'] = time.time()
+        self.assertTrue(OpenWeatherManager.is_current(OWjson))
+        self.assertFalse(OpenWeatherManager.is_current(OWjson, -(5*60)))
 
     def test_next_forecast(self):
-        json = OpenWeatherManager.get_Open_Weather_JSON()
-        self.assertTrue('dt' in OpenWeatherManager.get_next_forecast(json))
+        OWjson = json.load(open(os.path.join(fileDir, 'onecall.json')))
+        self.assertTrue('dt' in OpenWeatherManager.get_next_forecast(OWjson))
 
 if __name__ == '__main__':
     unittest.main()

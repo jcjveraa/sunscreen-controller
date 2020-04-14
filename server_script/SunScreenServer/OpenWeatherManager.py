@@ -2,6 +2,7 @@ import requests
 import json
 import os
 import time
+
 def get_Open_Weather_JSON(typeString="onecall"):
     """Gets the JSON response from openweathermap. Types are forecast, weather, onecall. Defauls to onecall."""
     fileDir = os.path.dirname(os.path.abspath(__file__))
