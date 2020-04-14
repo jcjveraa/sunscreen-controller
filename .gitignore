@@ -40,3 +40,5 @@ SuperSecretSettings.h
 build/*
 
 sunscreen/data/*
+
+secrets.json
