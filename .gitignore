@@ -42,3 +42,5 @@ build/*
 sunscreen/data/*
 
 secrets.json
+
+server_script/__pycache__

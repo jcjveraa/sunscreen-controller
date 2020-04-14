@@ -1,5 +1,5 @@
 import unittest
-from OpenWeatherManager import OpenWeatherManager
+from src.OpenWeatherManager import OpenWeatherManager
 
 class OWMTest(unittest.TestCase):
 

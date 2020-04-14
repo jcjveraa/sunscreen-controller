@@ -1,9 +1,11 @@
+import gzip
 import os
 import shutil
-import gzip
 
-data_dir = './sunscreen/data'
-source_dir = './sunscreen/data-raw'
+fileDir = os.path.dirname(os.path.abspath(__file__))
+
+data_dir = os.path.join(fileDir, '../sunscreen/data')
+source_dir =  os.path.join(fileDir, '../sunscreen/data-raw')
 
 # Clean the data dir
 try:
