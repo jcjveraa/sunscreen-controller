@@ -7,7 +7,7 @@ python:
   - "nightly"  # nightly build
 # command to install dependencies
 install:
-  - pip install -r server_script/requirements.txt
+  - pip install -r server_script/SunScreenServer/requirements.txt
 # command to run tests
 script:
   - cd server_script/SunScreenServer
