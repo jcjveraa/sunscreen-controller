@@ -1,5 +1,5 @@
 import unittest
-import OpenWeatherManager
+from SunScreenServer import OpenWeatherManager
 import json
 import os
 import time
