@@ -18,23 +18,45 @@ class OWMTest(unittest.TestCase):
         self.assertTrue(OpenWeatherManager.is_current(OWjson))
         self.assertFalse(OpenWeatherManager.is_current(OWjson, -(5*60)))
 
+    def test_sunset_sunrise(self):
+        OWjson = json.load(open(os.path.join(fileDir, 'onecall.json')))
+        self.assertFalse(OpenWeatherManager.is_nighttime(OWjson['current']))
+        OWjson['current']['dt'] = OWjson['current']['sunrise']-1
+        self.assertTrue(OpenWeatherManager.is_nighttime(OWjson['current']))
+        OWjson['current']['dt'] = OWjson['current']['sunset']+1
+        self.assertTrue(OpenWeatherManager.is_nighttime(OWjson['current']))
+
     def test_next_forecast(self):
         OWjson = json.load(open(os.path.join(fileDir, 'onecall.json')))
         self.assertTrue('dt' in OpenWeatherManager.get_next_forecast(OWjson))
 
     def test_high_winds(self):
         OWjson = json.load(open(os.path.join(fileDir, 'onecall.json')))
-        self.assertFalse(OpenWeatherManager.forecast_has_high_winds(
+        self.assertFalse(OpenWeatherManager.has_high_winds(
             OWjson['hourly'][0], 3.4))
-        self.assertTrue(OpenWeatherManager.forecast_has_high_winds(
+        self.assertTrue(OpenWeatherManager.has_high_winds(
             OWjson['hourly'][1], 3.4))
 
     def test_rain(self):
         OWjson = json.load(open(os.path.join(fileDir, 'onecall.json')))
-        self.assertFalse(OpenWeatherManager.forecast_has_rain(
+        self.assertFalse(OpenWeatherManager.has_rain(
             OWjson['hourly'][5]))
-        self.assertTrue(OpenWeatherManager.forecast_has_rain(
+        self.assertTrue(OpenWeatherManager.has_rain(
             OWjson['hourly'][6]))
+
+    def test_clouds(self):
+        OWjson = json.load(open(os.path.join(fileDir, 'onecall.json')))
+        self.assertFalse(OpenWeatherManager.is_cloudy(
+            OWjson['hourly'][0]))
+        self.assertTrue(OpenWeatherManager.is_cloudy(
+            OWjson['hourly'][2]))
+
+    def test_temp(self):
+        OWjson = json.load(open(os.path.join(fileDir, 'onecall.json')))
+        self.assertFalse(OpenWeatherManager.has_low_temp(
+            OWjson['hourly'][0], 5.0))
+        self.assertTrue(OpenWeatherManager.has_low_temp(
+            OWjson['hourly'][0], 25.0))
 
 
 if __name__ == '__main__':
