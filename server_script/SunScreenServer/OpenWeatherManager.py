@@ -52,7 +52,7 @@ def time_is_current(time_to_check, allowed_delta=(5*60)):
         return time_to_check <= (current_time + allowed_delta)
     else:
         raise Exception(
-            'This was an outdated forecast')
+            'This was an outdated forecast').with_traceback
 
 
 def get_next_forecast(json_buffer, allowed_delta=(3*60*60)):

@@ -9,7 +9,7 @@ def sun_not_on_window(azimuth_current: float, azimuth_lower: float, azimuth_high
 def should_sunscreen_open(solar_noon):
     secrets = get_secrets()
     current_azimuth = solar_azimuth_compass(
-        solar_noon, secrets['LAT'] * DEG_TO_RAD)
+        solar_noon, float(secrets['LAT']) * DEG_TO_RAD)
 
     checks = list()
 
