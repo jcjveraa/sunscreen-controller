@@ -1,9 +1,7 @@
-import OpenWeatherManager as owm
-
+from SunScreenServer import OpenWeatherManager as owm
 
 def move_sunscreen(direction_open: bool):
     pass
-
 
 LOW_TEMP = 20.0
 HIGH_WIND = 3.6

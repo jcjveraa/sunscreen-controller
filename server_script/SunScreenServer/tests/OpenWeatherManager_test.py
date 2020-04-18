@@ -12,6 +12,11 @@ class OWMTest(unittest.TestCase):
         self.assertEqual(OpenWeatherManager.kelvin_to_celcius(0), -273.15)
         self.assertNotEqual(OpenWeatherManager.kelvin_to_celcius(1), -270.15)
 
+    def test_solar_noon(self):
+        OWjson = json.load(open(os.path.join(fileDir, 'onecall.json')))
+        self.assertEqual(OpenWeatherManager.get_solar_noon(
+            OWjson['current']), 1586883340)
+
     def test_is_current_check(self):
         OWjson = json.load(open(os.path.join(fileDir, 'onecall.json')))
         OWjson['current']['dt'] = time.time()

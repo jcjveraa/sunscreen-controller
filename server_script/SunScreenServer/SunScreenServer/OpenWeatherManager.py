@@ -15,7 +15,22 @@ def get_Open_Weather_JSON(typeString="onecall"):
             "&appid=" + secrets['OPENWEATHERMAP_ORG_KEY']
         r = requests.get(openWeatherAPIurl)
         json_buffer = r.json()
-        return json_buffer
+        if(is_current(json_buffer)):
+            return json_buffer
+        else:
+            raise Exception(
+                'JSON data was not current in get_Open_Weather_JSON'
+            )
+
+
+def get_solar_noon(current_weather: dict) -> float:
+    """Returns the time of solar noon, directly 'in between' sunrise and sunset"""
+    if(all(x in current_weather for x in ['sunrise', 'sunset'])):
+        return ((current_weather['sunset']-current_weather['sunrise'])/2 + current_weather['sunrise'])
+    else:
+        raise Exception(
+            'No sunrise/sunset info found in forecast for get_solar_noon!'
+        )
 
 
 def kelvin_to_celcius(tempKelvin: float) -> float:
@@ -91,6 +106,7 @@ def is_nighttime(weather: dict):
             'No sunrise/sunset info found in forecast!'
         )
 
+
 def is_cloudy(weather: dict):
     """Returns true if its nighttime in this particular slot"""
     if(all(x in weather for x in ['clouds'])):
@@ -99,6 +115,7 @@ def is_cloudy(weather: dict):
         raise Exception(
             'No cloudiness info found in forecast!'
         )
+
 
 def should_sunscreen_open(LOW_TEMP: float, HIGH_WIND: float) -> bool:
     try:
