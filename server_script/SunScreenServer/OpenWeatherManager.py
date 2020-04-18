@@ -19,7 +19,7 @@ def get_Open_Weather_JSON(typeString="onecall"):
     else:
         raise Exception(
             'JSON data was not current in get_Open_Weather_JSON'
-            )
+        )
 
 
 def get_solar_noon(current_weather: dict) -> float:
@@ -52,7 +52,7 @@ def time_is_current(time_to_check, allowed_delta=(5*60)):
         return time_to_check <= (current_time + allowed_delta)
     else:
         raise Exception(
-            'This was an outdated forecast').with_traceback
+            'This was an outdated forecast')
 
 
 def get_next_forecast(json_buffer, allowed_delta=(3*60*60)):
@@ -106,17 +106,17 @@ def is_nighttime(weather: dict):
         )
 
 
-def is_cloudy(weather: dict):
+def is_cloudy(weather: dict, cloud_limit=50):
     """Returns true if its nighttime in this particular slot"""
     if(all(x in weather for x in ['clouds'])):
-        return weather['clouds'] > 50
+        return weather['clouds'] > cloud_limit
     else:
         raise Exception(
             'No cloudiness info found in forecast!'
         )
 
 
-def should_sunscreen_open(onecall:dict = None) -> bool:
+def check_list(onecall: dict = None) -> dict:
     try:
         secrets = get_secrets()
         LOW_TEMP = secrets['LOW_TEMP']
@@ -127,20 +127,22 @@ def should_sunscreen_open(onecall:dict = None) -> bool:
         next_fcst = get_next_forecast(onecall)
         current = onecall['current']
 
-        checks = list()
+        checks = dict()
 
         # Check the current weather
-        checks.append(has_low_temp(current, LOW_TEMP))
-        checks.append(is_nighttime(current))
-        checks.append(has_rain(current))
-        checks.append(has_high_winds(current, HIGH_WIND))
-        checks.append(is_cloudy(current))
-
+        checks['current_has_low_temp'] = has_low_temp(current, LOW_TEMP)
+        checks['current_has_rain'] = has_rain(current)
+        checks['current_has_high_winds'] = has_high_winds(current, HIGH_WIND)
+        checks['current_is_cloudy'] = is_cloudy(current, secrets['CLOUDS'])
         # Check the forecast
-        checks.append(has_rain(next_fcst))
-        checks.append(has_high_winds(next_fcst, HIGH_WIND))
+        checks['fcst_has_rain'] = has_rain(next_fcst)
+        checks['fcst_has_high_winds'] = has_high_winds(next_fcst, HIGH_WIND)
 
-        return not any(checks)
+        return checks
 
     except Exception as e:
         raise Exception(e)
+
+
+def should_sunscreen_open(onecall: dict = None) -> bool:
+    return not any(check_list(onecall).values())
