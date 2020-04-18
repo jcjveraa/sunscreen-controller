@@ -2,24 +2,23 @@ import requests
 import json
 import os
 import time
+from SunScreenServer.GetSecrets import get_secrets, write_json
 
 
 def get_Open_Weather_JSON(typeString="onecall"):
     """Gets the JSON response from openweathermap. Types are forecast, weather, onecall. Defauls to onecall."""
-    fileDir = os.path.dirname(os.path.abspath(__file__))
-    secrets_file = 'secrets.json'
-    with open(os.path.join(fileDir, secrets_file)) as secrets_json:
-        secrets = json.load(secrets_json)
-        openWeatherAPIurl = "https://api.openweathermap.org/data/2.5/"+typeString+"?lat=" + \
-            secrets['LAT'] + "&lon=" + secrets['LON'] + \
-            "&appid=" + secrets['OPENWEATHERMAP_ORG_KEY']
-        r = requests.get(openWeatherAPIurl)
-        json_buffer = r.json()
-        if(is_current(json_buffer)):
-            return json_buffer
-        else:
-            raise Exception(
-                'JSON data was not current in get_Open_Weather_JSON'
+    secrets = get_secrets()
+    openWeatherAPIurl = "https://api.openweathermap.org/data/2.5/"+typeString+"?lat=" + \
+        secrets['LAT'] + "&lon=" + secrets['LON'] + \
+        "&appid=" + secrets['OPENWEATHERMAP_ORG_KEY']
+    r = requests.get(openWeatherAPIurl)
+    json_buffer = r.json()
+    write_json(json_buffer, 'most_recent.json')
+    if(is_current(json_buffer)):
+        return json_buffer
+    else:
+        raise Exception(
+            'JSON data was not current in get_Open_Weather_JSON'
             )
 
 
@@ -117,9 +116,13 @@ def is_cloudy(weather: dict):
         )
 
 
-def should_sunscreen_open(LOW_TEMP: float, HIGH_WIND: float) -> bool:
+def should_sunscreen_open(onecall:dict = None) -> bool:
     try:
-        onecall = get_Open_Weather_JSON()
+        secrets = get_secrets()
+        LOW_TEMP = secrets['LOW_TEMP']
+        HIGH_WIND = secrets['HIGH_WIND']
+        if onecall is None:
+            onecall = get_Open_Weather_JSON()
         is_current(onecall)
         next_fcst = get_next_forecast(onecall)
         current = onecall['current']
