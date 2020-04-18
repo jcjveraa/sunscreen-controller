@@ -1,6 +1,6 @@
 import math
 import traceback
-from SunScreenServer.GetSecrets import append_json
+from SunScreenServer.GetSecrets import append_json, write_json
 from datetime import datetime
 
 from . import OpenWeatherManager, SunManager, TimeManager
@@ -31,7 +31,7 @@ def main():
         check_dict['timestamp'] = datetime.timestamp(now)
         check_dict['result'] = all(checks)
         append_json('log.json', check_dict)
-
+        write_json(onecall, 'file_dumps/onecall_'+str(int(check_dict['timestamp']))+'.json')
 
         if(all(checks)):
             move_sunscreen(True)
