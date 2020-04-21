@@ -50,3 +50,4 @@ __pycache__
 most_recent.json
 onecal*.json
 log.json
+server_script/SunScreenServer/log.json

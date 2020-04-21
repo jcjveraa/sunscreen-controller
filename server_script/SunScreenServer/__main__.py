@@ -1,17 +1,29 @@
 import math
 import traceback
-from SunScreenServer.GetSecrets import append_json, write_json
+from SunScreenServer.GetSecrets import append_json, write_json, get_secrets
 from datetime import datetime
+import requests
 
 from . import OpenWeatherManager, SunManager, TimeManager
 
 
 def move_sunscreen(direction_open: bool):
+    """Sends a command to the control unit - now via a Get request"""
+    secrets = get_secrets()
+    operate_url = "http://{}/Operate?direction={}&key={}&timestamp={}"
+
+    direction = "Close"
     if(direction_open):
+        direction = "Open"
         print("Opening!")
     else:
         print("Closing!")
-    pass
+
+    operate_url = operate_url.format(
+        secrets["ESP_IP"], direction, secrets["ESP_KEY"], datetime.timestamp(datetime.now()))
+    print(operate_url)
+    r = requests.get(operate_url)
+    print(r.json())
 
 
 def main():
@@ -31,7 +43,8 @@ def main():
         check_dict['timestamp'] = datetime.timestamp(now)
         check_dict['result'] = all(checks)
         append_json('log.json', check_dict)
-        write_json(onecall, 'file_dumps/onecall_'+str(int(check_dict['timestamp']))+'.json')
+        write_json(onecall, 'file_dumps/onecall_' +
+                   str(int(check_dict['timestamp']))+'.json')
 
         if(all(checks)):
             move_sunscreen(True)
