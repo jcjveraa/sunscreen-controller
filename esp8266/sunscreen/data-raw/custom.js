@@ -14,22 +14,29 @@ function updateResult(data) {
 }
 let key = GetURLParameter('key');
 
-function openClose(direction) {
-    let url = "./Operate?direction=" + direction + "&key=" + key + "&timestamp=" + Date.now();
+function openClose(targetPercentageOpen) {
+    let url = "./Operate?targetPercentageOpen=" + targetPercentageOpen + "&key=" + key + "&timestamp=" + Date.now();
     $.get(url, updateResult);
 }
 
 $("#button-open").click(function () {
-    openClose("Open")
-}
-);
+    openClose(100)
+});
 
 $("#button-close").click(function () {
-    openClose("Close")
-}
-);
+    openClose(0)
+});
+
+$("#button-set-to").click(function () {
+    openClose($('#target-percentage-select').val())
+});
 
 $("#button-current").click(function () {
-    $.get("./CurrentPosition?key=" + key, updateResult);
-}
-);
+        $.get("./CurrentPosition?key=" + key, updateResult);
+    });
+
+$(function () {
+    for (let index = 100; index >= 0; index -= 10) {
+        $('#target-percentage-select').append(`<option value="${index}"> ${index} </option>`);
+    }
+})

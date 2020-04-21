@@ -15,10 +15,14 @@
 
 ESP8266WebServer server(80);
 
-bool currentPositionOpen = false;
 const static String openWeatherAPI = "https://api.openweathermap.org/data/2.5/onecall?lat=" + String(LAT) + "&lon=" + String(LON) + "&appid=" + String(OPENWEATHERMAP_ORG_KEY);
 
 long lastUpdateTimestamp = 0;
+byte currentPercentageOpen = 0;
+
+boolean moving = false;
+unsigned long stopMoveTime;
+boolean movementDirection;
 
 File uploadFile;
 
@@ -67,22 +71,70 @@ void setup()
 
 void loop()
 {
+    if (moving)
+    {
+        manageMovement();
+    }
     server.handleClient();
+}
+
+void manageMovement()
+{
+    // check the current time vs the moment we are supposed to stop moving
+    if (millis() >= stopMoveTime)
+    {
+        // Stop the move
+        switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, movementDirection, 3);
+        moving = false;
+    }
 }
 
 void handleOpenClose()
 {
     if (checkKey())
     {
-        if (checkArg("direction") && checkArg("timestamp"))
+        if (checkArg("targetPercentageOpen") && checkArg("timestamp"))
         {
-            currentPositionOpen = server.arg("direction") == "Open";           // Default to the safe 'Close' option
-            switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, currentPositionOpen, 3); //switch group 1, device 1, repeat 3, on
-            lastUpdateTimestamp = server.arg("timestamp").toInt();
-            Serial.print("Setting to position " + server.arg("direction") + " \n");
-            server.send(200, "application/json", "{\"command_received\":\"" + server.arg("direction") + "\"}");
+            // currentPositionOpen = server.arg("direction") == "Open";           // Default to the safe 'Close' option
+            byte targetPercentageOpen = byte(server.arg("targetPercentageOpen").toInt());
+            float movementTime = calculateMovementTime(targetPercentageOpen, 45.0);
+
+            // Only move if we move more than one second
+            if (abs(movementTime) < 1)
+            {
+                movementDirection = movementTime > 0;
+                // Calculate how long we should move
+                stopMoveTime = millis() + int(1000 * movementTime);
+                // Start the move
+                switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, movementDirection, 3); //switch group 1, device 1, repeat 3, on
+                moving = true;
+
+                lastUpdateTimestamp = server.arg("timestamp").toInt();
+                Serial.print("Setting to position " + server.arg("targetPercentageOpen") + " \n");
+                // Send the response
+                handleGetCurrentPosition();
+                // server.send(200, "application/json", "{\"command_received\":\"" + server.arg("targetPercentageOpen") + "\"}");
+            }
         }
     }
+}
+
+// Returns the amount of seconds the movement should last
+// My sunscreen opens in 45 seconds
+float calculateMovementTime(byte targetPercentageOpen, float totalOpenTime)
+{
+    if (targetPercentageOpen == 0)
+    {
+        return -100.0f;
+    }
+
+    if (targetPercentageOpen == 100)
+    {
+        return 100.0f;
+    }
+
+    float deltaMovement = targetPercentageOpen - currentPercentageOpen;
+    return deltaMovement / 100.0 * totalOpenTime;
 }
 
 void handleGetCurrentPosition()
@@ -90,8 +142,7 @@ void handleGetCurrentPosition()
     if (checkKey())
     {
         Serial.print("Handling handleGetCurrentPosition()\n");
-        String position = currentPositionOpen ? "Open" : "Closed";
-        server.send(200, "application/json", "{\"position\": \"" + position + "\"" + ",\"lastUpdateTimestamp\": \"" + lastUpdateTimestamp + "\"" + "} ");
+        server.send(200, "application/json", "{\"position\": \"" + String(currentPercentageOpen) + "\",\"lastUpdateTimestamp\": \"" + lastUpdateTimestamp + "\"" + "} ");
     }
 }
 
