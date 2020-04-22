@@ -15,7 +15,7 @@
 
 ESP8266WebServer server(80);
 
-const static String openWeatherAPI = "https://api.openweathermap.org/data/2.5/onecall?lat=" + String(LAT) + "&lon=" + String(LON) + "&appid=" + String(OPENWEATHERMAP_ORG_KEY);
+// const static String openWeatherAPI = "https://api.openweathermap.org/data/2.5/onecall?lat=" + String(LAT) + "&lon=" + String(LON) + "&appid=" + String(OPENWEATHERMAP_ORG_KEY);
 
 long lastUpdateTimestamp = 0;
 byte currentPercentageOpen = 0;
@@ -98,19 +98,21 @@ void handleOpenClose()
             // currentPositionOpen = server.arg("direction") == "Open";           // Default to the safe 'Close' option
             byte targetPercentageOpen = byte(server.arg("targetPercentageOpen").toInt());
             float movementTime = calculateMovementTime(targetPercentageOpen, 45.0);
+            // Serial.println(movementTime + ", absolute value is " + abs(movementTime) );
 
             // Only move if we move more than one second
-            if (abs(movementTime) < 1)
+            if (abs(movementTime) > 1)
             {
                 movementDirection = movementTime > 0;
                 // Calculate how long we should move
-                stopMoveTime = millis() + int(1000 * movementTime);
+                stopMoveTime = millis() + int(1000 * abs(movementTime));
                 // Start the move
                 switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, movementDirection, 3); //switch group 1, device 1, repeat 3, on
                 moving = true;
 
                 lastUpdateTimestamp = server.arg("timestamp").toInt();
-                Serial.print("Setting to position " + server.arg("targetPercentageOpen") + " \n");
+                Serial.print("Setting to position from " + String(currentPercentageOpen) + " to " + server.arg("targetPercentageOpen") + " \n");
+                currentPercentageOpen = targetPercentageOpen;
                 // Send the response
                 handleGetCurrentPosition();
                 // server.send(200, "application/json", "{\"command_received\":\"" + server.arg("targetPercentageOpen") + "\"}");
@@ -243,7 +245,7 @@ bool checkArg(String arg)
         server.send(400, "text/plain", "Invalid parameters");
         return false;
     }
-
+    Serial.print("Argument " + arg + " was supplied, all OK\n");
     // All good!
     return true;
 }

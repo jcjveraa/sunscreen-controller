@@ -1,3 +1,3 @@
 from .version import __version__
 
-from . import OpenWeatherManager, SunManager, TimeManager
+from . import OpenWeatherManager, SunManager, TimeManager, OpenPosCalc
