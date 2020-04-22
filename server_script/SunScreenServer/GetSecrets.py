@@ -1,6 +1,8 @@
 import json
 import os
+from functools import lru_cache
 
+@lru_cache
 def get_secrets() -> dict:
     fileDir = os.path.dirname(os.path.abspath(__file__))
     secrets_file = 'secrets.json'

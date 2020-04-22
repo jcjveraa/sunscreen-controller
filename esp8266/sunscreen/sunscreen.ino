@@ -13,11 +13,14 @@
 #define KAKUPIN D6
 #define LED_PIN D4
 
+#define TIMEOUT 1000*60*30 // 30 minute timeout
+
 ESP8266WebServer server(80);
 
 // const static String openWeatherAPI = "https://api.openweathermap.org/data/2.5/onecall?lat=" + String(LAT) + "&lon=" + String(LON) + "&appid=" + String(OPENWEATHERMAP_ORG_KEY);
 
 long lastUpdateTimestamp = 0;
+unsigned long lastUpdateMillis = 0;
 byte currentPercentageOpen = 0;
 
 boolean moving = false;
@@ -67,15 +70,32 @@ void setup()
     server.begin(); // Actually start the server
 
     Serial.printf("Web server started, open %s in a web browser\n", WiFi.localIP().toString().c_str());
+
+    lastUpdateMillis = millis();
 }
 
 void loop()
 {
+    failSafe();
     if (moving)
     {
         manageMovement();
     }
     server.handleClient();
+}
+
+// Makes sure the screen will close in case there have been no commands for more than TIMEOUT duration
+void failSafe()
+{
+    // Check for a rollover which will happen every 50 days
+    // This will mess up the failsafe below, but acceptable risk
+    if(millis() < lastUpdateMillis){
+        lastUpdateMillis = millis();
+    }
+
+    if(millis() > (lastUpdateMillis + TIMEOUT) && currentPercentageOpen > 0) {
+        switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, false, 3);
+    }
 }
 
 void manageMovement()
@@ -95,6 +115,9 @@ void handleOpenClose()
     {
         if (checkArg("targetPercentageOpen") && checkArg("timestamp"))
         {
+            // Although we may not take action, store that the controller made contact.
+            lastUpdateMillis = millis();
+
             // currentPositionOpen = server.arg("direction") == "Open";           // Default to the safe 'Close' option
             byte targetPercentageOpen = byte(server.arg("targetPercentageOpen").toInt());
             float movementTime = calculateMovementTime(targetPercentageOpen, 45.0);
