@@ -11,6 +11,7 @@ def solar_hour_angle(solar_noon: float, in_radians=True, reference_time=None) ->
     if reference_time is None:
         reference_time = time()
     result = (reference_time - solar_noon) * degrees_per_second
+    print("Hour angle: "+str(result))
     if in_radians:
         result *= DEG_TO_RAD
     return result
@@ -26,7 +27,7 @@ def solar_declination(reference_time=None) -> float:
     N = dt_object.timetuple()[7] - 1
     term_1 = 0.98565 * DEG_TO_RAD * (N + 10)
     term_2 = 1.914 * sin(0.98565 * DEG_TO_RAD * (N - 2)) * DEG_TO_RAD
-    term_3 = sin(23.44*DEG_TO_RAD) * cos(term_1 + term_2)
+    term_3 = sin(-23.44*DEG_TO_RAD) * cos(term_1 + term_2)
     return -asin(term_3)
 
 

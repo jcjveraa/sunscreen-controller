@@ -43,21 +43,24 @@ def main():
         check_dict['timestamp'] = datetime.timestamp(now)
         check_dict['result'] = all(checks)
         check_dict['position'] = OpenPosCalc.get_open_percentage_required(
-            solar_noon, secrets['LAT'])
+            solar_noon)
         append_json('log.json', check_dict)
         write_json(onecall, 'file_dumps/onecall_' +
                    str(int(check_dict['timestamp']))+'.json')
 
         if(all(checks)):
             percent_open = OpenPosCalc.get_open_percentage_required(
-                solar_noon, secrets['LAT'])
+                solar_noon)
+            print("All checks OK!")
             move_sunscreen(percent_open)
         else:
+            print("Not checks OK!")
             move_sunscreen(0)
 
     except Exception as e:
         move_sunscreen(0)
-        print(e)
+
+        print('Exception!: '+e)
         pass
 
 

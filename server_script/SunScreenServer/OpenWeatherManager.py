@@ -5,7 +5,7 @@ import time
 from SunScreenServer.GetSecrets import get_secrets, write_json
 
 
-def get_Open_Weather_JSON(typeString="onecall"):
+def get_Open_Weather_JSON(typeString="onecall") -> dict:
     """Gets the JSON response from openweathermap. Types are forecast, weather, onecall. Defauls to onecall."""
     secrets = get_secrets()
     openWeatherAPIurl = "https://api.openweathermap.org/data/2.5/"+typeString+"?lat=" + \
