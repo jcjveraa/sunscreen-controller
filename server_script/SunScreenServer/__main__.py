@@ -6,7 +6,6 @@ import requests
 
 from . import OpenWeatherManager, SunManager, TimeManager, OpenPosCalc
 
-
 def move_sunscreen(percent_open: int):
     """Sends a command to the control unit - now via a Get request"""
     secrets = get_secrets()
@@ -19,15 +18,16 @@ def move_sunscreen(percent_open: int):
     print(operate_url)
     r = requests.get(operate_url)
     try:
+        print(r.status_code)
         print(r.json())
     except:
+        print('Some exception occured...')
         pass
     print(r.status_code)
 
 
 def main():
     try:
-        secrets = get_secrets()
         onecall = OpenWeatherManager.get_Open_Weather_JSON()
         owm_OK = OpenWeatherManager.should_sunscreen_open(onecall)
         solar_noon = OpenWeatherManager.get_solar_noon(onecall['current'])

@@ -13,7 +13,7 @@
 #define KAKUPIN D6
 #define LED_PIN D4
 
-#define TIMEOUT 1000*60*30 // 30 minute timeout
+#define TIMEOUT 1000 * 60 * 30 // 30 minute timeout
 
 ESP8266WebServer server(80);
 
@@ -89,11 +89,13 @@ void failSafe()
 {
     // Check for a rollover which will happen every 50 days
     // This will mess up the failsafe below, but acceptable risk
-    if(millis() < lastUpdateMillis){
+    if (millis() < lastUpdateMillis)
+    {
         lastUpdateMillis = millis();
     }
 
-    if(millis() > (lastUpdateMillis + TIMEOUT) && currentPercentageOpen > 0) {
+    if (millis() > (lastUpdateMillis + TIMEOUT) && currentPercentageOpen > 0)
+    {
         switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, false, 3);
         currentPercentageOpen = 0;
     }
@@ -141,6 +143,11 @@ void handleOpenClose()
                 handleGetCurrentPosition();
                 // server.send(200, "application/json", "{\"command_received\":\"" + server.arg("targetPercentageOpen") + "\"}");
             }
+            else
+            {
+                // Send a response indicating that we have not handled the request
+                handleGetCurrentPosition_code(202);
+            }
         }
     }
 }
@@ -165,10 +172,20 @@ float calculateMovementTime(byte targetPercentageOpen, float totalOpenTime)
 
 void handleGetCurrentPosition()
 {
+    handleGetCurrentPosition_code(200);
+    // if (checkKey())
+    // {
+    //     Serial.print("Handling handleGetCurrentPosition()\n");
+    //     server.send(200, "application/json", "{\"position\": \"" + String(currentPercentageOpen) + "\",\"lastUpdateTimestamp\": \"" + lastUpdateTimestamp + "\"" + "} ");
+    // }
+}
+
+void handleGetCurrentPosition_code(int code)
+{
     if (checkKey())
     {
         Serial.print("Handling handleGetCurrentPosition()\n");
-        server.send(200, "application/json", "{\"position\": \"" + String(currentPercentageOpen) + "\",\"lastUpdateTimestamp\": \"" + lastUpdateTimestamp + "\"" + "} ");
+        server.send(code, "application/json", "{\"position\": \"" + String(currentPercentageOpen) + "\",\"lastUpdateTimestamp\": \"" + lastUpdateTimestamp + "\"" + "} ");
     }
 }
 
