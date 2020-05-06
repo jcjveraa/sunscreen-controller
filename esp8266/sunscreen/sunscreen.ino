@@ -19,8 +19,8 @@ ESP8266WebServer server(80);
 
 // const static String openWeatherAPI = "https://api.openweathermap.org/data/2.5/onecall?lat=" + String(LAT) + "&lon=" + String(LON) + "&appid=" + String(OPENWEATHERMAP_ORG_KEY);
 
-long lastUpdateTimestamp = 0;
-unsigned long lastUpdateMillis = 0;
+unsigned long lastPositionChangeTimestamp = 0;
+unsigned long lastControllerContactMillis = 0;
 byte currentPercentageOpen = 0;
 
 boolean moving = false;
@@ -71,7 +71,7 @@ void setup()
 
     Serial.printf("Web server started, open %s in a web browser\n", WiFi.localIP().toString().c_str());
 
-    lastUpdateMillis = millis();
+    lastControllerContactMillis = millis();
 }
 
 void loop()
@@ -89,12 +89,12 @@ void failSafe()
 {
     // Check for a rollover which will happen every 50 days
     // This will mess up the failsafe below, but acceptable risk
-    if (millis() < lastUpdateMillis)
+    if (millis() < lastControllerContactMillis)
     {
-        lastUpdateMillis = millis();
+        lastControllerContactMillis = millis();
     }
 
-    if (millis() > (lastUpdateMillis + TIMEOUT) && currentPercentageOpen > 0)
+    if (millis() > (lastControllerContactMillis + TIMEOUT) && currentPercentageOpen > 0)
     {
         switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, false, 3);
         currentPercentageOpen = 0;
@@ -119,7 +119,7 @@ void handleOpenClose()
         if (checkArg("targetPercentageOpen") && checkArg("timestamp"))
         {
             // Although we may not take action, store that the controller made contact.
-            lastUpdateMillis = millis();
+            lastControllerContactMillis = millis();
 
             // currentPositionOpen = server.arg("direction") == "Open";           // Default to the safe 'Close' option
             byte targetPercentageOpen = byte(server.arg("targetPercentageOpen").toInt());
@@ -136,7 +136,7 @@ void handleOpenClose()
                 switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, movementDirection, 3); //switch group 1, device 1, repeat 3, on
                 moving = true;
 
-                lastUpdateTimestamp = server.arg("timestamp").toInt();
+                lastPositionChangeTimestamp = server.arg("timestamp").toInt();
                 Serial.print("Setting to position from " + String(currentPercentageOpen) + " to " + server.arg("targetPercentageOpen") + " \n");
                 currentPercentageOpen = targetPercentageOpen;
                 // Send the response
@@ -176,7 +176,7 @@ void handleGetCurrentPosition()
     // if (checkKey())
     // {
     //     Serial.print("Handling handleGetCurrentPosition()\n");
-    //     server.send(200, "application/json", "{\"position\": \"" + String(currentPercentageOpen) + "\",\"lastUpdateTimestamp\": \"" + lastUpdateTimestamp + "\"" + "} ");
+    //     server.send(200, "application/json", "{\"position\": \"" + String(currentPercentageOpen) + "\",\"lastPositionChangeTimestamp\": \"" + lastPositionChangeTimestamp + "\"" + "} ");
     // }
 }
 
@@ -185,7 +185,7 @@ void handleGetCurrentPosition_code(int code)
     if (checkKey())
     {
         Serial.print("Handling handleGetCurrentPosition()\n");
-        server.send(code, "application/json", "{\"position\": \"" + String(currentPercentageOpen) + "\",\"lastUpdateTimestamp\": \"" + lastUpdateTimestamp + "\"" + "} ");
+        server.send(code, "application/json", "{\"position\": \"" + String(currentPercentageOpen) + "\",\"lastPositionChangeTimestamp\": \"" + lastPositionChangeTimestamp + "\"" + "} ");
     }
 }
 
