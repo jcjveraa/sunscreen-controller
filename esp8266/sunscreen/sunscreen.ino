@@ -95,6 +95,7 @@ void failSafe()
 
     if(millis() > (lastUpdateMillis + TIMEOUT) && currentPercentageOpen > 0) {
         switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, false, 3);
+        currentPercentageOpen = 0;
     }
 }
 
