@@ -5,6 +5,7 @@ import time
 import unittest
 
 from SunScreenServer import SunPositionCalcs
+from SunScreenServer.SunPositionCalcs import DEG_TO_RAD
 
 fileDir = os.path.dirname(os.path.abspath(__file__))
 

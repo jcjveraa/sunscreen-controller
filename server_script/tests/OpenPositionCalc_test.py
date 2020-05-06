@@ -1,21 +1,19 @@
 
-# import unittest
-# from os import listdir
-# from os.path import isfile, join
+import unittest
+from os import listdir
+from os.path import isfile, join
 
-# from SunScreenServer.GetSecrets import get_secrets
-# from SunScreenServer.OpenPosCalc import get_open_percentage_required
+from SunScreenServer.GetSecrets import get_secrets
+from SunScreenServer.OpenPosCalc import get_open_percentage_required, open_percentage_required
+from SunScreenServer.SunPositionCalcs import DEG_TO_RAD
 
 
-# class OpenPosCalcTest(unittest.TestCase):
+class OpenPosCalcTest(unittest.TestCase):
 
-#     secrets = get_secrets()
+    secrets = get_secrets()
 
-#     def test_azimuth(self):
-#         mypath = __file__+'../SunScreenServer/file_dumps'
-#         onlyfiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
-#         for f in onlyfiles:
-#             print(f)
+    def test_open_pos(self):
+        self.assertEqual(int(24.46524406), open_percentage_required(49.83*DEG_TO_RAD, -1.158375025))
 
-# if __name__ == '__main__':
-#     unittest.main()
+if __name__ == '__main__':
+    unittest.main()
