@@ -3,7 +3,7 @@ from SunScreenServer.GetSecrets import get_secrets
 from math import acos, tan, pi, cos
 
 
-def get_open_percentage_required(solar_noon: float, latitude: float = None, reference_time=None) -> int:
+def get_open_percentage_required(solar_noon: float, latitude: float = None, reference_time=None, adjustment = 0) -> int:
     """Retuns the percentage that the sunscreen should open"""
     if latitude is None:
         secrets = get_secrets()
@@ -13,7 +13,7 @@ def get_open_percentage_required(solar_noon: float, latitude: float = None, refe
     azimuth_deg = solar_azimuth_compass(solar_noon, latitude, reference_time)
     house_incidence_angle_rad = incidence_angle(
         azimuth_deg, secrets['HOUSE_FACING_DEG'])
-    return open_percentage_required(elevation_angle, house_incidence_angle_rad)
+    return open_percentage_required(elevation_angle, house_incidence_angle_rad, adjustment)
 
 
 def open_percentage_required(elevation_angle: float, house_incidence_angle_rad: float, adjustment = 0) -> int:
