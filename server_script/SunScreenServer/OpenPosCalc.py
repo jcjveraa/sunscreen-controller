@@ -16,7 +16,7 @@ def get_open_percentage_required(solar_noon: float, latitude: float = None, refe
     return open_percentage_required(elevation_angle, house_incidence_angle_rad)
 
 
-def open_percentage_required(elevation_angle: float, house_incidence_angle_rad: float) -> int:
+def open_percentage_required(elevation_angle: float, house_incidence_angle_rad: float, adjustment = 0) -> int:
     """Factors veru specific for my set up, to be generalized"""
     print("Elevation: " + str(elevation_angle))
     tan_of_height_angle = tan(elevation_angle)/cos(house_incidence_angle_rad)
@@ -24,6 +24,6 @@ def open_percentage_required(elevation_angle: float, house_incidence_angle_rad: 
     b = 62
     c = 255
     d = 299
-    result = (c - tan_of_height_angle*a)/(d*tan_of_height_angle+b)
+    result = (c - tan_of_height_angle*a)/(d*tan_of_height_angle+b) + adjustment
     # Return result between 0 and 100
     return int(min(100, max(0, 100 * result)))
