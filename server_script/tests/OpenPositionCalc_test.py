@@ -15,5 +15,8 @@ class OpenPosCalcTest(unittest.TestCase):
     def test_open_pos(self):
         self.assertEqual(int(24.46524406), open_percentage_required(49.83*DEG_TO_RAD, -1.158375025))
 
+    def test_open_pos_with_adjustment(self):
+        self.assertEqual(int(24.46524406) + 10, open_percentage_required(49.83*DEG_TO_RAD, -1.158375025, adjustment=10))
+
 if __name__ == '__main__':
     unittest.main()
