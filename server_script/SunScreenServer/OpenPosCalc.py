@@ -3,7 +3,7 @@ from SunScreenServer.GetSecrets import get_secrets
 from math import acos, tan, pi, cos
 
 
-def get_open_percentage_required(solar_noon: float, latitude: float = None, reference_time=None, adjustment = 0) -> int:
+def get_open_percentage_required(solar_noon: float, latitude: float = None, reference_time=None, adjustment=0) -> int:
     """Retuns the percentage that the sunscreen should open"""
     if latitude is None:
         secrets = get_secrets()
@@ -16,7 +16,7 @@ def get_open_percentage_required(solar_noon: float, latitude: float = None, refe
     return open_percentage_required(elevation_angle, house_incidence_angle_rad, adjustment)
 
 
-def open_percentage_required(elevation_angle: float, house_incidence_angle_rad: float, adjustment = 0) -> int:
+def open_percentage_required(elevation_angle: float, house_incidence_angle_rad: float, adjustment=0) -> int:
     """Factors veru specific for my set up, to be generalized"""
     print("Elevation: " + str(elevation_angle))
     tan_of_height_angle = tan(elevation_angle)/cos(house_incidence_angle_rad)
@@ -24,6 +24,6 @@ def open_percentage_required(elevation_angle: float, house_incidence_angle_rad: 
     b = 62
     c = 255
     d = 299
-    result = (c - tan_of_height_angle*a)/(d*tan_of_height_angle+b) + adjustment
+    result = (c - tan_of_height_angle*a)/(d*tan_of_height_angle+b)
     # Return result between 0 and 100
-    return int(min(100, max(0, 100 * result)))
+    return int(min(100, max(0, 100 * result)) + adjustment)
