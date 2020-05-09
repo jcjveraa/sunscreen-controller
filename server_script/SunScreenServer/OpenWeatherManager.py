@@ -13,7 +13,8 @@ def get_Open_Weather_JSON(typeString="onecall") -> dict:
         "&appid=" + secrets['OPENWEATHERMAP_ORG_KEY']
     r = requests.get(openWeatherAPIurl)
     json_buffer = r.json()
-    write_json(json_buffer, 'most_recent.json')
+    if secrets['LOGGING']:
+        write_json(json_buffer, 'most_recent.json')
     if(is_current(json_buffer)):
         return json_buffer
     else:

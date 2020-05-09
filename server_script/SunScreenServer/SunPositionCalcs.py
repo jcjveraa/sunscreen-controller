@@ -11,7 +11,7 @@ def solar_hour_angle(solar_noon: float, in_radians=True, reference_time=None) ->
     if reference_time is None:
         reference_time = time()
     result = (reference_time - solar_noon) * degrees_per_second
-    print("Hour angle: "+str(result))
+    # print("Hour angle: "+str(result))
     if in_radians:
         result *= DEG_TO_RAD
     return result

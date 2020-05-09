@@ -6,10 +6,31 @@ import requests
 
 from . import OpenWeatherManager, SunManager, TimeManager, OpenPosCalc
 
+
+def get_current_position() -> int:
+    secrets = get_secrets()
+    check_url = "http://{}/CurrentPosition?key={}"
+
+    check_url = check_url.format(
+        secrets["ESP_IP"],  secrets["ESP_KEY"])
+    r = requests.get(check_url)
+    try:
+        json = r.json()
+        return int(json['position'])
+    except:
+        print('Some exception occured...')
+        print(r.status_code)
+        return -1
+
+
 def move_sunscreen(percent_open: int):
     """Sends a command to the control unit - now via a Get request"""
     secrets = get_secrets()
     operate_url = "http://{}/Operate?targetPercentageOpen={}&key={}&timestamp={}"
+
+    if get_current_position() is percent_open:
+        print('not moving, current percentage already matches')
+        exit()
 
     print("moving to " + str(percent_open))
 
@@ -28,6 +49,7 @@ def move_sunscreen(percent_open: int):
 
 def main():
     try:
+        secrets = get_secrets()
         onecall = OpenWeatherManager.get_Open_Weather_JSON()
         owm_OK = OpenWeatherManager.should_sunscreen_open(onecall)
         solar_noon = OpenWeatherManager.get_solar_noon(onecall['current'])
@@ -44,9 +66,10 @@ def main():
         check_dict['result'] = all(checks)
         check_dict['position'] = OpenPosCalc.get_open_percentage_required(
             solar_noon)
-        append_json('log.json', check_dict)
-        write_json(onecall, 'file_dumps/onecall_' +
-                   str(int(check_dict['timestamp']))+'.json')
+        if secrets['LOGGING']:
+            append_json('log.json', check_dict)
+            write_json(onecall, 'file_dumps/onecall_' +
+                    str(int(check_dict['timestamp']))+'.json')
 
         if(all(checks)):
             percent_open = OpenPosCalc.get_open_percentage_required(
