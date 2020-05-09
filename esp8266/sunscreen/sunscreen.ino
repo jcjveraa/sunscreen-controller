@@ -184,6 +184,7 @@ void handleGetCurrentPosition_code(int code)
 {
     if (checkKey())
     {
+        lastControllerContactMillis = millis();
         Serial.print("Handling handleGetCurrentPosition()\n");
         server.send(code, "application/json", "{\"position\": \"" + String(currentPercentageOpen) + "\",\"lastPositionChangeTimestamp\": \"" + lastPositionChangeTimestamp + "\"" + "} ");
     }
