@@ -1,0 +1,10 @@
+{
+    "LOW_TEMP": 15.0,
+    "HIGH_WIND": 5,
+    "CLOUDS": 50,
+    "ESP_KEY": "eu836xLsKY1JV6zDEWi0oyBBK_qVZC9quqrij8pb",
+    "ESP_IP": "192.168.178.101",
+    "HOUSE_FACING_DEG" : 226.38,
+    "CURRENT_MODE": 1,
+    "LOGGING": false
+}
