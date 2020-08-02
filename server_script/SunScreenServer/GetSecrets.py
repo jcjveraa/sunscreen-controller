@@ -10,7 +10,7 @@ def get_secrets() -> dict:
 
     secrets_file = 'secrets.json'
     config_file = 'config.json'
-    
+
     with open(os.path.join(fileDir, config_file)) as config_json:
         config = json.load(config_json)
         result.update(config)
