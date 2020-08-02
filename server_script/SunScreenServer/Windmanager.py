@@ -27,9 +27,4 @@ def post_to_adafruit():
 
     r = requests.post(adafruitFeed, json=payload, headers=headers)
 
-if(screen_should_close()):
-        move_sunscreen(0)
-
-post_to_adafruit()
-
 # print(r.text)

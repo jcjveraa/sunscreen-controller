@@ -1,12 +1,14 @@
 import math
 import traceback
 from datetime import datetime
+import argparse
 
 from SunScreenServer import Windmanager
 
 from . import OpenPosCalc, OpenWeatherManager, SunManager, TimeManager
 from .GetSecrets import append_json, get_secrets, write_json
 from .ScreenMover import move_sunscreen
+from SunScreenServer.Windmanager import post_to_adafruit, screen_should_close
 
 
 def main():
@@ -50,6 +52,16 @@ def main():
         print('Exception!: '+e)
         pass
 
+def wind():
+    post_to_adafruit()
+    if(screen_should_close()):
+        move_sunscreen(0)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Manage the sun screen')
+    parser.add_argument("--wind", help="Do only a wind check")
+    args = parser.parse_args()
+    if args.wind:
+        wind()
+    else:
+        main()
