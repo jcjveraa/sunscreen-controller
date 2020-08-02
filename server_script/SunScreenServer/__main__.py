@@ -1,50 +1,12 @@
 import math
 import traceback
-from SunScreenServer.GetSecrets import append_json, write_json, get_secrets
 from datetime import datetime
-import requests
 
-from . import OpenWeatherManager, SunManager, TimeManager, OpenPosCalc
+from SunScreenServer import Windmanager
 
-
-def get_current_position() -> int:
-    secrets = get_secrets()
-    check_url = "http://{}/CurrentPosition?key={}"
-
-    check_url = check_url.format(
-        secrets["ESP_IP"],  secrets["ESP_KEY"])
-    r = requests.get(check_url)
-    try:
-        json = r.json()
-        return int(json['position'])
-    except:
-        print('Some exception occured...')
-        print(r.status_code)
-        return -1
-
-
-def move_sunscreen(percent_open: int):
-    """Sends a command to the control unit - now via a Get request"""
-    secrets = get_secrets()
-    operate_url = "http://{}/Operate?targetPercentageOpen={}&key={}&timestamp={}"
-
-    if get_current_position() is percent_open:
-        print('not moving, current percentage already matches')
-        exit()
-
-    print("moving to " + str(percent_open))
-
-    operate_url = operate_url.format(
-        secrets["ESP_IP"], percent_open, secrets["ESP_KEY"], datetime.timestamp(datetime.now()))
-    print(operate_url)
-    r = requests.get(operate_url)
-    try:
-        print(r.status_code)
-        print(r.json())
-    except:
-        print('Some exception occured...')
-        pass
-    print(r.status_code)
+from . import OpenPosCalc, OpenWeatherManager, SunManager, TimeManager
+from .GetSecrets import append_json, get_secrets, write_json
+from .ScreenMover import move_sunscreen
 
 
 def main():
@@ -55,11 +17,13 @@ def main():
         solar_noon = OpenWeatherManager.get_solar_noon(onecall['current'])
         sm_OK = SunManager.should_sunscreen_open(solar_noon)
         tm_OK = TimeManager.should_sunscreen_open()
-        checks = [owm_OK, sm_OK, tm_OK]
+        wind_OK = not Windmanager.screen_should_close()
+        checks = [owm_OK, sm_OK, tm_OK, wind_OK]
         print(checks)
         check_dict = OpenWeatherManager.check_list(onecall)
         check_dict['sunmgr'] = not sm_OK
         check_dict['timemgr'] = not tm_OK
+        check_dict['windmgr'] = not wind_OK
         now = datetime.now()
         check_dict['time'] = now.strftime("%d-%m-%y %H:%M:%S")
         check_dict['timestamp'] = datetime.timestamp(now)
