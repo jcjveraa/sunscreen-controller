@@ -2,9 +2,18 @@
     "LOW_TEMP": 15.0,
     "HIGH_WIND": 5,
     "CLOUDS": 50,
-    "ESP_KEY": "eu836xLsKY1JV6zDEWi0oyBBK_qVZC9quqrij8pb",
-    "ESP_IP": "192.168.178.101",
     "HOUSE_FACING_DEG" : 226.38,
     "CURRENT_MODE": 1,
-    "LOGGING": false
+    "LOGGING": false,
+
+    "OPENWEATHERMAP_ORG_KEY": "0",
+    "LON": "0",
+    "LAT": "01",
+    "AZIMUTH_SUNUP": 0,
+    "AZIMUTH_SUNDOWN": 0,
+    "ESP_KEY": "0",
+    "ESP_IP": "0",
+    "WINDMOSIP": "0",
+    "ADAFRUIT_IO_FEEDS_URL": "0",
+    "ADAFRUIT_IO_KEY": "0"
 }

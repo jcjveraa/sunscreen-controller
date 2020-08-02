@@ -10,15 +10,18 @@ def get_secrets() -> dict:
 
     secrets_file = 'secrets.json'
     config_file = 'config.json'
+    
+    with open(os.path.join(fileDir, config_file)) as config_json:
+        config = json.load(config_json)
+        result.update(config)
+
     try:
         with open(os.path.join(fileDir, secrets_file)) as secrets_json:
             secrets = json.load(secrets_json)
             result.update(secrets)
     except:
         print('secrets.json not available, perhaps in testing mode?')
-    with open(os.path.join(fileDir, config_file)) as config_json:
-        config = json.load(config_json)
-        result.update(config)
+
     return result
 
 def write_json(json_buffer: dict, location: str):
