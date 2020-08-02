@@ -19,7 +19,7 @@ def get_secrets() -> dict:
     with open(os.path.join(fileDir, config_file)) as config_json:
         config = json.load(config_json)
         result.update(config)
-    return secrets
+    return result
 
 def write_json(json_buffer: dict, location: str):
     fileDir = os.path.dirname(os.path.abspath(__file__))
