@@ -12,6 +12,7 @@ from SunScreenServer.Windmanager import post_to_adafruit, screen_should_close
 
 
 def main():
+    print('Running all checks')
     try:
         secrets = get_secrets()
         onecall = OpenWeatherManager.get_Open_Weather_JSON()
@@ -53,6 +54,7 @@ def main():
         pass
 
 def wind():
+    print('Checking wind speeds and uploading to Adafruit')
     post_to_adafruit()
     if(screen_should_close()):
         move_sunscreen(0)
