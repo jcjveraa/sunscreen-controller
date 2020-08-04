@@ -23,10 +23,9 @@ def move_sunscreen(percent_open: int):
     secrets = get_secrets()
     operate_url = "http://{}/Operate?targetPercentageOpen={}&key={}&timestamp={}"
 
-    # Disable this as we need to keep communicating
-    # if get_current_position() is percent_open:
-      #  print('not moving, current percentage already matches')
-       # exit()
+    if get_current_position() is percent_open:
+       print('not moving, current percentage already matches')
+       exit()
 
     print("moving to " + str(percent_open))
 
