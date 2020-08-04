@@ -9,6 +9,7 @@ python:
 install:
   - pip install -r server_script/SunScreenServer/requirements.txt
   - pip install coverage
+  - pip install --user codecov
 # command to run tests
 script:
   - cd server_script
