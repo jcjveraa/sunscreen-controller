@@ -121,7 +121,7 @@ def check_list(onecall: dict = None) -> dict:
     try:
         secrets = get_secrets()
         LOW_TEMP = secrets['LOW_TEMP']
-        HIGH_WIND = secrets['HIGH_WIND']
+        HIGH_WIND = secrets['HIGH_WIND_OPEN_WEATHER']
         if onecall is None:
             onecall = get_Open_Weather_JSON()
         is_current(onecall)
