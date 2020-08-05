@@ -1,10 +1,11 @@
 {
     "LOW_TEMP": 15.0,
-    "HIGH_WIND": 5,
-    "CLOUDS": 50,
+    "HIGH_WIND_OPEN_WEATHER": 7.5,
+    "HIGH_WIND_DIRECT_MEASUREMENT": 5.5,
+    "CLOUDS": 60,
     "HOUSE_FACING_DEG" : 226.38,
     "CURRENT_MODE": 0,
-    "LOGGING": false,
+    "LOGGING": true,
 
     "OPENWEATHERMAP_ORG_KEY": "0",
     "LON": "0",
