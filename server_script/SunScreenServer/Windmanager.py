@@ -9,7 +9,7 @@ secrets = get_secrets()
 
 def check_array_high_wind(wind_speed_arr):
     print('Wind speeds:', wind_speed_arr)
-    return wind_speed_arr[3] >= secrets['HIGH_WIND']
+    return wind_speed_arr[3] >= secrets['HIGH_WIND_DIRECT_MEASUREMENT']
 
 def get_data():
     windMosUrl = "http://"+secrets['WINDMOSIP']+"/counter"
