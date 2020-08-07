@@ -13,7 +13,7 @@ def post_position_to_adafruit(position: int) -> int:
         r = requests.post(adafruitFeed, json=payload, headers=headers)
         return 0
     except:
-        print('Some exception occured...')
+        print('Some exception occured in post_position_to_adafruit ...')
         return 999
 
 def get_current_position() -> int:
