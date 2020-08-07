@@ -3,6 +3,18 @@ from datetime import datetime
 
 from .GetSecrets import append_json, write_json, get_secrets
 
+def post_position_to_adafruit(position: int) -> int:
+    try:
+        adafruitFeed = secrets['ADAFRUIT_IO_FEEDS_URL'] + "sunscreenpos/data"
+        headers = {'X-AIO-Key': secrets['ADAFRUIT_IO_KEY'], "Content-Type": "application/json"}
+        payload = {'value':position}
+
+        r = requests.post(adafruitFeed, json=payload, headers=headers)
+        return 0
+    except:
+        print('Some exception occured...')
+        return 999
+
 def get_current_position() -> int:
     secrets = get_secrets()
     check_url = "http://{}/CurrentPosition?key={}"
@@ -12,7 +24,9 @@ def get_current_position() -> int:
     r = requests.get(check_url)
     try:
         json = r.json()
-        return int(json['position'])
+        position = int(json['position'])
+        post_position_to_adafruit(position)
+        return int(position )
     except:
         print('Some exception occured...')
         print(r.status_code)
