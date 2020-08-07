@@ -4,6 +4,7 @@ from datetime import datetime
 from .GetSecrets import append_json, write_json, get_secrets
 
 def post_position_to_adafruit(position: int) -> int:
+    secrets = get_secrets()
     try:
         adafruitFeed = secrets['ADAFRUIT_IO_FEEDS_URL'] + "sunscreenpos/data"
         headers = {'X-AIO-Key': secrets['ADAFRUIT_IO_KEY'], "Content-Type": "application/json"}
