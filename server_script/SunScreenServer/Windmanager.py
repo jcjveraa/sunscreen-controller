@@ -4,6 +4,7 @@ import requests
 import json
 from .GetSecrets import append_json, write_json, get_secrets
 from SunScreenServer.ScreenMover import move_sunscreen
+from datetime import datetime,timedelta
 
 secrets = get_secrets()
 
@@ -17,8 +18,13 @@ def get_data():
     return r.json()
 
 def screen_should_close():
-    json_buffer = get_data()
-    return check_array_high_wind(json_buffer['averages'])
+    try:
+        json_buffer = get_data()
+        result = check_array_high_wind(json_buffer['averages']) or check_last_25_minutes_had_high_winds
+        return check_array_high_wind(json_buffer['averages'])
+    except:
+        return True
+
 
 def post_to_adafruit():
     json_buffer = get_data()
@@ -27,5 +33,22 @@ def post_to_adafruit():
     payload = {'value':json_buffer['averages'][3] }
 
     r = requests.post(adafruitFeed, json=payload, headers=headers)
+
+def check_last_25_minutes_had_high_winds(test_json_string=False):
+    if test_json_string:
+        print(test_json_string)
+        json_buff = json.loads(test_json_string)
+    else:
+        start_time = (datetime.utcnow() - timedelta(minutes=25)).isoformat()
+        adafruitFeed = secrets['ADAFRUIT_IO_FEEDS_URL'] + "wind/data?start_time=" + start_time
+        headers = {'X-AIO-Key': secrets['ADAFRUIT_IO_KEY']}
+
+        r = requests.get(adafruitFeed, headers=headers)
+        json_buff = r.json()
+
+    if(secrets['LOGGING']):
+        print(json_buff)
+    wind_check = any(float(x['value']) >= secrets['HIGH_WIND_DIRECT_MEASUREMENT'] for x in json_buff)
+    return wind_check
 
 # print(r.text)
