@@ -20,7 +20,7 @@ def get_data():
 def screen_should_close():
     try:
         json_buffer = get_data()
-        result = check_array_high_wind(json_buffer['averages']) or check_last_25_minutes_had_high_winds
+        result = check_array_high_wind(json_buffer['averages']) or check_last_25_minutes_had_high_winds()
         return check_array_high_wind(json_buffer['averages'])
     except:
         return True
