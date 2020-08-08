@@ -47,6 +47,7 @@ def check_last_25_minutes_had_high_winds(test_json_string=False):
         json_buff = r.json()
 
     if(secrets['LOGGING']):
+        print('Adafruit loaded!')
         print(json_buff)
     wind_check = any(float(x['value']) >= secrets['HIGH_WIND_DIRECT_MEASUREMENT'] for x in json_buff)
     return wind_check
