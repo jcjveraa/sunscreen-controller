@@ -9,7 +9,8 @@ from datetime import datetime,timedelta
 secrets = get_secrets()
 
 def check_array_high_wind(wind_speed_arr):
-    print('Wind speeds:', wind_speed_arr)
+    if(secrets['LOGGING']):
+        print('Wind speeds:', wind_speed_arr)
     return wind_speed_arr[3] >= secrets['HIGH_WIND_DIRECT_MEASUREMENT']
 
 def get_data():
@@ -50,6 +51,9 @@ def check_last_25_minutes_had_high_winds(test_json_string=False):
         print('Adafruit loaded!')
         print(json_buff)
     wind_check = any(float(x['value']) >= secrets['HIGH_WIND_DIRECT_MEASUREMENT'] for x in json_buff)
+    if(secrets['LOGGING']):
+        print('Wind check result')
+        print(wind_check)
     return wind_check
 
 # print(r.text)
