@@ -21,8 +21,11 @@ def get_data():
 def screen_should_close():
     try:
         json_buffer = get_data()
+        if(secrets['LOGGING']):
+            print(check_array_high_wind(json_buffer['averages']))
+            print(check_last_25_minutes_had_high_winds())
         result = check_array_high_wind(json_buffer['averages']) or check_last_25_minutes_had_high_winds()
-        return check_array_high_wind(json_buffer['averages'])
+        return result
     except:
         return True
 
@@ -52,7 +55,7 @@ def check_last_25_minutes_had_high_winds(test_json_string=False):
         print(json_buff)
     wind_check = any(float(x['value']) >= secrets['HIGH_WIND_DIRECT_MEASUREMENT'] for x in json_buff)
     if(secrets['LOGGING']):
-        print('Wind check result')
+        print('Adafruit Wind check result')
         print(wind_check)
     return wind_check
 
