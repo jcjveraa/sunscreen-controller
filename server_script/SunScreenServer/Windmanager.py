@@ -43,7 +43,7 @@ def check_last_25_minutes_had_high_winds(test_json_string=False):
         print(test_json_string)
         json_buff = json.loads(test_json_string)
     else:
-        start_time = (datetime.utcnow() - timedelta(minutes=25)).isoformat()
+        start_time = (datetime.utcnow() - timedelta(minutes=secrets['DIRECT_MEASUREMENT_LOOKBACK_MINUTES'])).isoformat()
         adafruitFeed = secrets['ADAFRUIT_IO_FEEDS_URL'] + "wind/data?start_time=" + start_time
         headers = {'X-AIO-Key': secrets['ADAFRUIT_IO_KEY']}
 
