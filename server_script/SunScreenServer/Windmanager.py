@@ -19,15 +19,19 @@ def get_data():
     return r.json()
 
 def screen_should_close():
-    try:
-        json_buffer = get_data()
-        if(secrets['LOGGING']):
-            print(check_array_high_wind(json_buffer['averages']))
-            print(check_last_25_minutes_had_high_winds())
-        result = check_array_high_wind(json_buffer['averages']) or check_last_25_minutes_had_high_winds()
-        return result
-    except:
-        return True
+    if(secrets['DIRECT_MEASUREMENT_ENABLED']):
+        try:
+            json_buffer = get_data()
+            if(secrets['LOGGING']):
+                print(check_array_high_wind(json_buffer['averages']))
+                print(check_last_25_minutes_had_high_winds())
+            result = check_array_high_wind(json_buffer['averages']) or check_last_25_minutes_had_high_winds()
+            return result
+        except:
+            return True
+     
+    else:
+        return False
 
 
 def post_to_adafruit():
