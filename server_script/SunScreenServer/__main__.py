@@ -40,7 +40,7 @@ def main():
 
         if(all(checks)):
             percent_open = OpenPosCalc.get_open_percentage_required(
-                solar_noon, adjustment=6)
+                solar_noon, adjustment=secrets['PERCENTAGE_CORRECTION'])
             print("All checks OK!")
             move_sunscreen(percent_open)
         else:

@@ -2,11 +2,12 @@
     "LOW_TEMP": 15.0,
     "HIGH_WIND_OPEN_WEATHER": 7.5,
     "HIGH_WIND_DIRECT_MEASUREMENT": 8.5,
-    "CLOUDS": 60,
+    "CLOUDS": 100,
     "HOUSE_FACING_DEG" : 226.38,
     "CURRENT_MODE": 0,
     "LOGGING": false,
     "DIRECT_MEASUREMENT_LOOKBACK_MINUTES": 10,
+    "PERCENTAGE_CORRECTION": 10,
 
     "OPENWEATHERMAP_ORG_KEY": "0",
     "LON": "0",
@@ -17,5 +18,7 @@
     "ESP_IP": "0",
     "WINDMOSIP": "0",
     "ADAFRUIT_IO_FEEDS_URL": "0",
-    "ADAFRUIT_IO_KEY": "0"
+    "ADAFRUIT_IO_KEY": "0",
+    "KNMI_KEY":"0",
+    "KNMI_KEY_2": "0"
 }
