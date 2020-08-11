@@ -22,7 +22,7 @@ def main():
         solar_noon = OpenWeatherManager.get_solar_noon(onecall['current'])
         outside_temp_celcius = onecall['current']['temp'] - 273.15
 
-        post_to_adafruit("solar_theoretical", theoretical_solar_output(outside_temp_celcius))
+        post_to_adafruit("solar-theoretical", theoretical_solar_output(outside_temp_celcius))
 
         sm_OK = SunManager.should_sunscreen_open(solar_noon)
         tm_OK = TimeManager.should_sunscreen_open()
