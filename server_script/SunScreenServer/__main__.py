@@ -1,14 +1,16 @@
+import argparse
 import math
 import traceback
 from datetime import datetime
-import argparse
 
-from SunScreenServer import Windmanager
+from SunScreenServer import SolarEdgeManager, Windmanager
+from SunScreenServer.adafruitPoster import post_to_adafruit
+from SunScreenServer.SolarEdgeManager import theoretical_solar_output
+from SunScreenServer.Windmanager import screen_should_close
 
 from . import OpenPosCalc, OpenWeatherManager, SunManager, TimeManager
 from .GetSecrets import append_json, get_secrets, write_json
 from .ScreenMover import move_sunscreen
-from SunScreenServer.Windmanager import post_to_adafruit, screen_should_close
 
 
 def main():
@@ -18,15 +20,21 @@ def main():
         onecall = OpenWeatherManager.get_Open_Weather_JSON()
         owm_OK = OpenWeatherManager.should_sunscreen_open(onecall)
         solar_noon = OpenWeatherManager.get_solar_noon(onecall['current'])
+        outside_temp_celcius = onecall['current']['temp'] - 273.15
+
+        post_to_adafruit("solar_theoretical", theoretical_solar_output(outside_temp_celcius))
+
         sm_OK = SunManager.should_sunscreen_open(solar_noon)
         tm_OK = TimeManager.should_sunscreen_open()
         wind_OK = not Windmanager.screen_should_close()
-        checks = [owm_OK, sm_OK, tm_OK, wind_OK]
+        solarEdge_OK = not SolarEdgeManager.screen_should_close(outside_temp_celcius)
+        checks = [owm_OK, sm_OK, tm_OK, wind_OK, solarEdge_OK]
         print(checks)
         check_dict = OpenWeatherManager.check_list(onecall)
         check_dict['sunmgr'] = not sm_OK
         check_dict['timemgr'] = not tm_OK
         check_dict['windmgr'] = not wind_OK
+        check_dict['solarEdgeMgr'] = not solarEdge_OK
         now = datetime.now()
         check_dict['time'] = now.strftime("%d-%m-%y %H:%M:%S")
         check_dict['timestamp'] = datetime.timestamp(now)
