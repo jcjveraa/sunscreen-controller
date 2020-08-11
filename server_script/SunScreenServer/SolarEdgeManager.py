@@ -49,6 +49,8 @@ def get_power(temperature = 30):
 
 
 def screen_should_close(temperature=30):
+    if (get_power() == 0 or theoretical_solar_output(temperature) == 0):
+        return True
     if(get_power() > (0.25*theoretical_solar_output(temperature))):
         return False
     else:
