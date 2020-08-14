@@ -1,37 +1,56 @@
+import requests
+
+import numpy as np
+import pandas as pd
+import pvlib
+from pvlib.pvsystem import PVSystem
+from pvlib.location import Location
+from pvlib.modelchain import ModelChain
+from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from datetime import datetime
 
-import requests
-from numpy import array, cos, deg2rad, sin
-from solarpy import solar_panel
-
 from SunScreenServer.adafruitPoster import post_to_adafruit
-
 from .GetSecrets import get_secrets
 
 
-def theoretical_solar_output(temperature = 30):
+def theoretical_solar_output(temp_air=20):
+    # For this example, we will be using Golden, Colorado
     secrets = get_secrets()
-    s = 1.686 * 1.016 * 12  # m2
-    eff = 0.190 - 0.0037*(temperature-25)
+    tz = 'Europe/Amsterdam'
+    lat, lon = secrets['LAT'], secrets['LON']
 
-    alpha = deg2rad(270+180 - 226.38)
-    beta = deg2rad(30)
+    # Create location object to store lat, lon, timezone
+    site = Location(lat, lon, tz=tz)
 
-    x = cos(alpha) * cos(beta)
-    z = sin(alpha) * cos(beta)
-    y = sin(beta)
+    cec_modules = pvlib.pvsystem.retrieve_sam(name='CECMod')
+    cec_inverters = pvlib.pvsystem.retrieve_sam('cecinverter')
 
-    sp5 = solar_panel(s, eff, 'panels')
-    sp5.set_orientation(array([z, x, -y]))
+    lg_panels = cec_modules['LG_Electronics_Inc__LG325N1K_A5']
+    solaredge_inverter = cec_inverters['SolarEdge_Technologies_Ltd___SE4000__240V_']
+    surf_tilt = 20
 
-    lat, lng, h = float(secrets['LAT']), float(secrets['LON']), 0
+    temperature_model_parameters = TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
+    location = site
+    system = PVSystem(module_parameters=lg_panels,
+                      inverter_parameters=solaredge_inverter,
+                      surface_tilt=surf_tilt,
+                      surface_azimuth=secrets['HOUSE_FACING_DEG'],
+                      strings_per_inverter=12,
+                      temperature_model_parameters=temperature_model_parameters)
 
-    sp5.set_position(lat, lng, h)
-    sp5.set_datetime(datetime.now())
-    # print(sp5.power())
-    return sp5.power()
+    mc = ModelChain(system, location,  orientation_strategy="None",
+                    aoi_model="physical", spectral_model="no_loss")
 
-def get_power(temperature = 30):
+    daterange_now = pd.date_range(
+        start=datetime.now(), periods=1, freq='1min', tz=tz)
+
+    cs = site.get_clearsky(daterange_now)
+    cs.insert(3, "temp_air", temp_air)
+    mc.run_model(cs)
+    return mc.ac.item()
+
+
+def get_power(temperature=30):
     try:
         secrets = get_secrets()
         siteId = secrets['SOLAREDGE_SITEID']
@@ -55,6 +74,3 @@ def screen_should_close(temperature=30):
         return False
     else:
         return True
-
-
-theoretical_solar_output()

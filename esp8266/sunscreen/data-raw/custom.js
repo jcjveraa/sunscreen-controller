@@ -35,8 +35,17 @@ $("#button-current").click(function () {
         $.get("./CurrentPosition?key=" + key, updateResult);
     });
 
+$("#button-mode").click(function () {
+    $.post("./Automatic?key=" + key, updateMode);
+});
+
+function updateMode(data) {
+    $("#span-mode").text(data['automatic_mode']);
+}
+
 $(function () {
     for (let index = 100; index >= 0; index -= 10) {
         $('#target-percentage-select').append(`<option value="${index}"> ${index} </option>`);
     }
+    $.get("./Automatic?key=" + key, updateMode);
 })

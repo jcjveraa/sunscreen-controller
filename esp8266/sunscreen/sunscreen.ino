@@ -3,6 +3,7 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266mDNS.h>
 #include <ESP8266WebServer.h>
+#include <ESP8266HTTPUpdateServer.h>
 #include <WiFiClient.h>
 #include "SuperSecretSettings.h" // File containing const char*'s for SSID & PASSWORD & KEY
 #include <FS.h>                  // Include the SPIFFS library
@@ -16,6 +17,7 @@
 #define TIMEOUT 1000 * 60 * 30 // 30 minute timeout
 
 ESP8266WebServer server(80);
+ESP8266HTTPUpdateServer httpUpdater;
 
 // const static String openWeatherAPI = "https://api.openweathermap.org/data/2.5/onecall?lat=" + String(LAT) + "&lon=" + String(LON) + "&appid=" + String(OPENWEATHERMAP_ORG_KEY);
 
@@ -27,6 +29,8 @@ boolean moving = false;
 unsigned long stopMoveTime;
 boolean movementDirection;
 
+boolean automaticModeEnabled = false;
+
 File uploadFile;
 
 void setup()
@@ -35,6 +39,7 @@ void setup()
     Serial.println();
 
     Serial.printf("Connecting to %s ", SSID_1);
+    WiFi.mode(WIFI_STA);
     WiFi.begin(SSID_1, PASSWORD_1);
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -56,13 +61,21 @@ void setup()
 
     SPIFFS.begin(); // Start the SPI Flash Files System
 
+    //Updater
+    httpUpdater.setup(&server, OTAPATH, OTAUSER, OTAPASSWORD);
+
     server.onNotFound([]() {                                  // If the client requests any URI
         if (!handleFileRead(server.uri()))                    // send it if it exists
             server.send(404, "text/plain", "404: Not Found"); // otherwise, respond with a 404 (Not Found) error
     });
 
-    server.on("/Operate", handleOpenClose);
+    server.on("/Operate", handleOpenCloseAutomatic);
+    server.on("/OperateManual", handleOpenCloseManual);
     server.on("/CurrentPosition", handleGetCurrentPosition);
+
+    server.on("/Automatic", HTTP_GET, handleGetAutomaticMode);
+    server.on("/Automatic", HTTP_POST, handleToggleAutomaticMode);
+
     server.on("/files", HTTP_GET, handleFileList);
     server.on(
         "/files", HTTP_POST, [] { server.send(200, "application/json", "{\"fileupload\":1}"); }, handleFileUpload);
@@ -110,6 +123,34 @@ void manageMovement()
         switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, movementDirection, 3);
         moving = false;
     }
+}
+
+void handleGetAutomaticMode()
+{
+    const char *autoMode = automaticModeEnabled ? "true" : "false";
+    server.send(200, "application/json", "{\"automatic_mode\":\"" + String(autoMode) + "\"}");
+}
+
+void handleToggleAutomaticMode()
+{
+    if (checkKey())
+    {
+        automaticModeEnabled = !automaticModeEnabled;
+        handleGetAutomaticMode();
+    }
+}
+
+void handleOpenCloseAutomatic()
+{
+    if (automaticModeEnabled)
+    {
+        handleOpenClose();
+    }
+}
+
+void handleOpenCloseManual()
+{
+    handleOpenClose();
 }
 
 void handleOpenClose()
