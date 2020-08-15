@@ -146,6 +146,11 @@ void handleOpenCloseAutomatic()
     {
         handleOpenClose();
     }
+
+    else
+    {
+        server.send(409);
+    }
 }
 
 void handleOpenCloseManual()
