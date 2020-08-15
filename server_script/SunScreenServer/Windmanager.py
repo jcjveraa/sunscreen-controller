@@ -29,7 +29,6 @@ def screen_should_close():
             return result
         except:
             return True
-     
     else:
         return False
 

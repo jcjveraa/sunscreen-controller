@@ -2,11 +2,11 @@ import argparse
 import math
 import traceback
 from datetime import datetime
+import os
 
 from SunScreenServer import SolarEdgeManager, Windmanager
 from SunScreenServer.adafruitPoster import post_to_adafruit
 from SunScreenServer.SolarEdgeManager import theoretical_solar_output
-from SunScreenServer.Windmanager import screen_should_close
 
 from . import OpenPosCalc, OpenWeatherManager, SunManager, TimeManager
 from .GetSecrets import append_json, get_secrets, write_json
@@ -63,11 +63,16 @@ def main():
 
 def wind():
     print('Checking wind speeds and uploading to Adafruit')
-    post_to_adafruit()
-    if(screen_should_close()):
+    Windmanager.post_to_adafruit()
+    if(Windmanager.screen_should_close()):
         move_sunscreen(0)
 
 if __name__ == '__main__':
+    # Lower priority
+    value = 5
+    niceValue = os.nice(value)
+    print("\nCurrent nice value of the process:", niceValue)
+
     parser = argparse.ArgumentParser(description='Manage the sun screen')
     parser.add_argument("--wind", help="Do only a wind check")
     args = parser.parse_args()

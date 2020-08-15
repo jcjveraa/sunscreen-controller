@@ -17,7 +17,7 @@ def theoretical_solar_output(temp_air=20):
     # For this example, we will be using Golden, Colorado
     secrets = get_secrets()
     tz = 'Europe/Amsterdam'
-    lat, lon = secrets['LAT'], secrets['LON']
+    lat, lon = float(secrets['LAT']), float(secrets['LON'])
 
     # Create location object to store lat, lon, timezone
     site = Location(lat, lon, tz=tz)
