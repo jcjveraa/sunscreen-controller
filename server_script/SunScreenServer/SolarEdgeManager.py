@@ -88,7 +88,7 @@ def generate_theoretical_solar_output(temp_air=20):
     print("Current theoretical solar cache size after flushing:", r.dbsize())
     # print(range(temp_air-10, temp_air+10))
 
-    for temp in range(temp_air-10, temp_air+10):
+    for temp in range(temp_air-10, temp_air+20):
         weather = cs.copy()
         weather.insert(3, "temp_air", temp)
         mc.run_model(weather)
