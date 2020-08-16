@@ -136,6 +136,8 @@ def get_power():
         r.set('previous_energy_watthour', current_energy_watthour)
         r.set('previous_energy_watthour_timestamp', now_timestamp)
 
+        print('power is',currentPower)
+
         post_to_adafruit("solar", currentPower)
         return currentPower
     except:
