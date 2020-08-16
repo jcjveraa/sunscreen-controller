@@ -14,7 +14,7 @@ def theoretical_solar_output(temp_air=20):
     temp_air = round(temp_air)
     key = round_time(datetime.now(), 10*60).replace(microsecond=0, second=0).astimezone(
     ).isoformat() + '_temp=' + str(temp_air)
-    cache_result = r.get("key")
+    cache_result = r.get(key)
 
     if cache_result:
         print('Cached result loaded for key:', key)
