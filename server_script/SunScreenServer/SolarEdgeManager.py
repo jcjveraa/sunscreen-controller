@@ -18,7 +18,7 @@ def theoretical_solar_output(temp_air=20):
 
     if cache_result:
         print('Cached result loaded for key:', key)
-        return cache_result
+        return float(cache_result)
     else:
         print('No cached result for key', key,
               ', populating Redis database number 1...')
