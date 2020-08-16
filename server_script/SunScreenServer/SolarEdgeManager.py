@@ -83,7 +83,7 @@ def generate_theoretical_solar_output(temp_air=20):
             redis_key = index.to_pydatetime().replace(
                 microsecond=0, second=0).astimezone().isoformat() + '_temp=' + str(temp)
             r.set(redis_key, ac_power)
-            name = input(redis_key + str(ac_power))
+            # name = input(redis_key + str(ac_power))
     print("Current theoretical solar cache size after filling:", r.dbsize())
 
 
