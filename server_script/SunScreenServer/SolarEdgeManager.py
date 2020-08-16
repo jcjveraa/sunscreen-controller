@@ -145,9 +145,12 @@ def get_power():
 
 
 def screen_should_close(temperature=30):
-    if (get_power() == 0 or theoretical_solar_output(temperature) == 0):
+    curr_power = get_power()
+    theo_power = theoretical_solar_output(temperature)
+    print('current & theo:',curr_power, theo_power)
+    if (curr_power == 0 or theo_power == 0):
         return True
-    if(get_power() > (0.25*theoretical_solar_output(temperature))):
+    if(curr_power > (0.25*theo_power)):
         return False
     else:
         return True
