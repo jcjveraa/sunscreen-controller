@@ -55,7 +55,7 @@ def get_power(temperature=30):
         secrets = get_secrets()
         siteId = secrets['SOLAREDGE_SITEID']
         sApiKey = secrets['SOLAREDGE_KEY']
-        solar_edge_url = f"https://monitoringapi.solaredge.com/site/{siteId}/overview?api_key={sApiKey}"
+        solar_edge_url = f"https://monitoringapi.solaredge.com/site/{siteId}/overview?api_key={sApiKey}&format=json"
         # print(solar_edge_url)
 
         overview = requests.get(solar_edge_url).json()
