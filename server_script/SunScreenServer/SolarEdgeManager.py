@@ -8,6 +8,8 @@ from .GetSecrets import get_secrets
 
 
 def theoretical_solar_output(temp_air=20):
+    # force temp to int - close enough...
+    temp_air = int(temp_air)
     r = redis.Redis(db = 1)
     temp_air = round(temp_air)
     key = datetime.now().replace(microsecond=0, second=0).astimezone(
@@ -15,8 +17,10 @@ def theoretical_solar_output(temp_air=20):
     cache_result = r.get("key")
 
     if cache_result:
+        print('Cached result loaded!')
         return cache_result
     else:
+        print('No cached result, populating Redis database number 1...')
         generate_theoretical_solar_output(temp_air)
         return theoretical_solar_output(temp_air)
 
@@ -71,13 +75,13 @@ def generate_theoretical_solar_output(temp_air=20):
     r = redis.Redis(db = 1)
     r.flushdb()
     print("Current theoretical solar cache size after flushing:", r.dbsize())
-    print(range(temp_air-10, temp_air+10))
+    # print(range(temp_air-10, temp_air+10))
 
     for temp in range(temp_air-10, temp_air+10):
         weather = cs.copy()
         weather.insert(3, "temp_air", temp)
         mc.run_model(weather)
-        print(mc.ac)
+        # print(mc.ac)
 
         for index, ac_power in mc.ac.items():
             redis_key = index.to_pydatetime().replace(
