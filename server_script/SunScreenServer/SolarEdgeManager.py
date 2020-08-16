@@ -1,5 +1,6 @@
 from datetime import datetime
 import requests
+import redis
 
 from SunScreenServer.adafruitPoster import post_to_adafruit
 
@@ -7,10 +8,10 @@ from .GetSecrets import get_secrets
 
 
 def theoretical_solar_output(temp_air=20):
-    import redis
-    r = redis.Redis()
+    r = redis.Redis(db = 1)
     temp_air = round(temp_air)
-    key = datetime.now().replace(microsecond=0, second=0).astimezone().isoformat() + '_temp=' + str(temp_air)
+    key = datetime.now().replace(microsecond=0, second=0).astimezone(
+    ).isoformat() + '_temp=' + str(temp_air)
     cache_result = r.get("key")
 
     if cache_result:
@@ -21,7 +22,6 @@ def theoretical_solar_output(temp_air=20):
 
 
 def generate_theoretical_solar_output(temp_air=20):
-    import redis
     import numpy as np
     import pandas as pd
     import pvlib
@@ -61,28 +61,54 @@ def generate_theoretical_solar_output(temp_air=20):
 
     cs = site.get_clearsky(daterange_now)
 
+    # select the DB and flush it first
+    r = redis.Redis(db = 1)
+    r.flushdb()
+    print("Current theoretical solar cache size after flushing:", r.dbsize())
+
     for temp in range(temp_air-10, temp_air+10):
         weather = cs.copy()
         weather.insert(3, "temp_air", temp)
         mc.run_model(weather)
 
         for index, ac_power in mc.ac.items():
-            r = redis.Redis()
-            redis_key = index.to_pydatetime().replace(microsecond=0, second=0).astimezone().isoformat() + '_temp=' + str(temp_air)
+            redis_key = index.to_pydatetime().replace(
+                microsecond=0, second=0).astimezone().isoformat() + '_temp=' + str(temp_air)
             r.set(redis_key, ac_power)
+    print("Current theoretical solar cache size after filling:", r.dbsize())
 
 
-def get_power(temperature=30):
+def get_power():
     try:
+        import time
+        r = redis.Redis(db = 0)
         secrets = get_secrets()
+
         siteId = secrets['SOLAREDGE_SITEID']
         sApiKey = secrets['SOLAREDGE_KEY']
-        solar_edge_url = f"https://monitoringapi.solaredge.com/site/{siteId}/overview?api_key={sApiKey}"
+        solar_edge_url = f"https://monitoringapi.solaredge.com/site/{siteId}/overview?api_key={sApiKey}&format=json"
         # print(solar_edge_url)
 
         overview = requests.get(solar_edge_url).json()
         # print(overview)
         currentPower = overview['overview']['currentPower']['power']
+        current_energy_watthour = overview['overview']['lifeTimeData']['energy']
+
+        previous_energy_watthour = float(r.get('previous_energy_watthour'))
+        previous_energy_watthour_timestamp = float(r.get(
+            'previous_energy_watthour_timestamp'))
+
+        now_timestamp = time.time()
+
+        # convert watthour + time interval in seconds to power
+        if previous_energy_watthour and previous_energy_watthour_timestamp:
+            hours_passed = (
+                now_timestamp - previous_energy_watthour_timestamp)/3600
+            currentPower = (currentEnergy - previousEnergy) / hours_passed
+
+        r.set('previous_energy_watthour', current_energy_watthour)
+        r.set('previous_energy_watthour_timestamp', now_timestamp)
+
         post_to_adafruit("solar", currentPower)
         return currentPower
     except:
