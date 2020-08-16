@@ -1,19 +1,34 @@
+from datetime import datetime
 import requests
 
-import numpy as np
-import pandas as pd
-import pvlib
-from pvlib.pvsystem import PVSystem
-from pvlib.location import Location
-from pvlib.modelchain import ModelChain
-from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
-from datetime import datetime
-
 from SunScreenServer.adafruitPoster import post_to_adafruit
+
 from .GetSecrets import get_secrets
 
 
 def theoretical_solar_output(temp_air=20):
+    import redis
+    r = redis.Redis()
+    temp_air = round(temp_air)
+    key = datetime.now().replace(microsecond=0, second=0).astimezone().isoformat() + '_temp=' + str(temp_air)
+    cache_result = r.get("key")
+
+    if cache_result:
+        return cache_result
+    else:
+        generate_theoretical_solar_output(temp_air)
+        return theoretical_solar_output(temp_air)
+
+
+def generate_theoretical_solar_output(temp_air=20):
+    import redis
+    import numpy as np
+    import pandas as pd
+    import pvlib
+    from pvlib.pvsystem import PVSystem
+    from pvlib.location import Location
+    from pvlib.modelchain import ModelChain
+    from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
     # For this example, we will be using Golden, Colorado
     secrets = get_secrets()
     tz = 'Europe/Amsterdam'
@@ -45,9 +60,16 @@ def theoretical_solar_output(temp_air=20):
         start=datetime.now(), periods=1, freq='1min', tz=tz)
 
     cs = site.get_clearsky(daterange_now)
-    cs.insert(3, "temp_air", temp_air)
-    mc.run_model(cs)
-    return mc.ac.item()
+
+    for temp in range(temp_air-10, temp_air+10):
+        weather = cs.copy()
+        weather.insert(3, "temp_air", temp)
+        mc.run_model(weather)
+
+        for index, ac_power in mc.ac.items():
+            r = redis.Redis()
+            redis_key = index.to_pydatetime().replace(microsecond=0, second=0).astimezone().isoformat() + '_temp=' + str(temp_air)
+            r.set(redis_key, ac_power)
 
 
 def get_power(temperature=30):
