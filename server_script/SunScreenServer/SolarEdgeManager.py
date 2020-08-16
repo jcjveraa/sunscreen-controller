@@ -126,12 +126,11 @@ def get_power():
 
         # convert watthour + time interval in seconds to power
         if previous_energy_watthour and previous_energy_watthour_timestamp:
-            now_timestamp = float(now_timestamp)
             previous_energy_watthour_timestamp = float(
                 previous_energy_watthour_timestamp)
             hours_passed = (
                 now_timestamp - previous_energy_watthour_timestamp)/3600
-            currentPower = (current_energy_watthour - previous_energy_watthour) / hours_passed
+            currentPower = (current_energy_watthour - float(previous_energy_watthour)) / hours_passed
 
         r.set('previous_energy_watthour', current_energy_watthour)
         r.set('previous_energy_watthour_timestamp', now_timestamp)
