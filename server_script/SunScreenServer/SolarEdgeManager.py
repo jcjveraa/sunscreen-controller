@@ -131,7 +131,7 @@ def get_power():
                 previous_energy_watthour_timestamp)
             hours_passed = (
                 now_timestamp - previous_energy_watthour_timestamp)/3600
-            currentPower = (currentEnergy - previousEnergy) / hours_passed
+            currentPower = (current_energy_watthour - previous_energy_watthour) / hours_passed
 
         r.set('previous_energy_watthour', current_energy_watthour)
         r.set('previous_energy_watthour_timestamp', now_timestamp)
