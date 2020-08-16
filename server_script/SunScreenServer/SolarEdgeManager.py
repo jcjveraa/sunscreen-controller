@@ -144,10 +144,11 @@ def get_power():
 
 
 def screen_should_close(temperature=30):
+    secrets = get_secrets()
     curr_power = get_power()
     theo_power = theoretical_solar_output(temperature)
     print('current & theo:',curr_power, theo_power)
-    if (curr_power == 0 or theo_power == 0):
+    if (curr_power <= secrets['SOLAR_POWER_LIMIT'] or theo_power <= 0):
         return True
     if(curr_power > (0.25*theo_power)):
         return False
