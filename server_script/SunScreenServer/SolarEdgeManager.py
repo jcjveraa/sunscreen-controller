@@ -22,6 +22,7 @@ def theoretical_solar_output(temp_air=20):
 
 
 def generate_theoretical_solar_output(temp_air=20):
+    from datetime import timedelta
     import numpy as np
     import pandas as pd
     import pvlib
@@ -56,9 +57,14 @@ def generate_theoretical_solar_output(temp_air=20):
     mc = ModelChain(system, location,  orientation_strategy="None",
                     aoi_model="physical", spectral_model="no_loss")
 
-    daterange_now = pd.date_range(
-        start=datetime.now(), periods=1, freq='1min', tz=tz)
+    # daterange_now = pd.date_range(
+    #     start=datetime.now().replace(
+    #             microsecond=0, second=0), periods=1, freq='1min', tz=tz)
+    start_date = datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+    end_date = start_date + timedelta(days=1, minutes=-1)
 
+    daterange_now = pd.date_range(
+        start=start_date, end=end_date, freq='10min', tz=tz)
     cs = site.get_clearsky(daterange_now)
 
     # select the DB and flush it first
@@ -75,7 +81,7 @@ def generate_theoretical_solar_output(temp_air=20):
 
         for index, ac_power in mc.ac.items():
             redis_key = index.to_pydatetime().replace(
-                microsecond=0, second=0).astimezone().isoformat() + '_temp=' + str(temp_air)
+                microsecond=0, second=0).astimezone().isoformat() + '_temp=' + str(temp)
             r.set(redis_key, ac_power)
             name = input(redis_key + str(ac_power))
     print("Current theoretical solar cache size after filling:", r.dbsize())
