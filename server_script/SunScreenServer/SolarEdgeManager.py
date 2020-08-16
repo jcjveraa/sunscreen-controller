@@ -65,11 +65,13 @@ def generate_theoretical_solar_output(temp_air=20):
     r = redis.Redis(db = 1)
     r.flushdb()
     print("Current theoretical solar cache size after flushing:", r.dbsize())
+    print(range(temp_air-10, temp_air+10))
 
     for temp in range(temp_air-10, temp_air+10):
         weather = cs.copy()
         weather.insert(3, "temp_air", temp)
         mc.run_model(weather)
+        print(mc.ac)
 
         for index, ac_power in mc.ac.items():
             redis_key = index.to_pydatetime().replace(
