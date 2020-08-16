@@ -12,7 +12,7 @@ def theoretical_solar_output(temp_air=20):
     temp_air = int(temp_air)
     r = redis.Redis(db = 1)
     temp_air = round(temp_air)
-    key = datetime.now().replace(microsecond=0, second=0).astimezone(
+    key = round_time(datetime.now(), 10*60).replace(microsecond=0, second=0).astimezone(
     ).isoformat() + '_temp=' + str(temp_air)
     cache_result = r.get("key")
 
@@ -24,6 +24,14 @@ def theoretical_solar_output(temp_air=20):
         generate_theoretical_solar_output(temp_air)
         return theoretical_solar_output(temp_air)
 
+def round_time(dt, round_to_seconds=60):
+    """Round a datetime object to any number of seconds
+    dt: datetime.datetime object
+    round_to_seconds: closest number of seconds for rounding, Default 1 minute.
+    """
+    rounded_epoch = round(dt.timestamp() / round_to_seconds) * round_to_seconds
+    rounded_dt = datetime.fromtimestamp(rounded_epoch).astimezone(dt.tzinfo)
+    return rounded_dt
 
 def generate_theoretical_solar_output(temp_air=20):
     from datetime import timedelta
