@@ -10,7 +10,9 @@ function GetURLParameter(sParam) {
 }
 
 function updateResult(data) {
-    $("#result").html(data);
+    // $("#result").html(data);
+    $("#pos-luifel").html(data['position_luifel']);
+    $("#pos-screen").html(data['position_screen']);
 }
 let key = GetURLParameter('key');
 
@@ -19,12 +21,26 @@ function openClose(targetPercentageOpen) {
     $.get(url, updateResult);
 }
 
+function openCloseScreen(targetPercentageOpen) {
+    let url = "./Operate_screen?targetPercentageOpen=" + targetPercentageOpen + "&key=" + key + "&timestamp=" + Date.now();
+    $.get(url, updateResult);
+}
+
+
 $("#button-open").click(function () {
     openClose(100)
 });
 
 $("#button-close").click(function () {
     openClose(0)
+});
+
+$("#button-open-screen").click(function () {
+    openCloseScreen(100)
+});
+
+$("#button-close-screen").click(function () {
+    openCloseScreen(0)
 });
 
 $("#button-set-to").click(function () {
@@ -39,8 +55,13 @@ $("#button-mode").click(function () {
     $.post("./Automatic?key=" + key, updateMode);
 });
 
+$("#button-mode-screen").click(function () {
+    $.post("./Automatic_screen?key=" + key, updateMode);
+});
+
 function updateMode(data) {
     $("#span-mode").text(data['automatic_mode']);
+    $("#span-mode-screen").text(data['automatic_mode_screen']);
 }
 
 $(function () {
