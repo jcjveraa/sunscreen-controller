@@ -34,6 +34,8 @@ boolean movementDirection;
 boolean automaticModeEnabled_luifel = false;
 boolean automaticModeEnabled_screen = false;
 
+long currentStatusSolarManager = -1;
+
 File uploadFile;
 
 void setup()
@@ -81,6 +83,9 @@ void setup()
     server.on("/Automatic", HTTP_GET, handleGetAutomaticMode);
     server.on("/Automatic", HTTP_POST, handleToggleAutomaticMode);
     server.on("/Automatic_screen", HTTP_POST, handleToggleAutomaticMode_screen);
+
+    server.on("/set_currentStatusSolarManager", HTTP_GET, handleUpdateStatus);
+    server.on("/get_currentStatusSolarManager", HTTP_GET, handleGetStatus);
 
     server.on("/files", HTTP_GET, handleFileList);
     server.on(
@@ -446,4 +451,33 @@ String getContentType(String filename)
     else if (filename.endsWith(".gz"))
         return "application/x-gzip";
     return "text/plain";
+}
+
+void handleUpdateStatus()
+{
+    if (!checkKey())
+    {
+        server.send(500);
+        return;
+    }
+
+    if (!checkArg("checksStatus"))
+    {
+        server.send(500);
+        return;
+    }
+
+    currentStatusSolarManager = server.arg("checksStatus").toInt();
+    server.send(200);
+}
+
+void handleGetStatus()
+{
+    if (checkKey())
+    {
+        server.send(200, "application/json", "{\"currentStatusSolarManager\":\"" + String(currentStatusSolarManager) + "\"}");
+        return;
+    }
+
+    server.send(500);
 }

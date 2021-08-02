@@ -48,8 +48,8 @@ $("#button-set-to").click(function () {
 });
 
 $("#button-current").click(function () {
-        $.get("./CurrentPosition?key=" + key, updateResult);
-    });
+    $.get("./CurrentPosition?key=" + key, updateResult);
+});
 
 $("#button-mode").click(function () {
     $.post("./Automatic?key=" + key, updateMode);
@@ -69,4 +69,33 @@ $(function () {
         $('#target-percentage-select').append(`<option value="${index}"> ${index} </option>`);
     }
     $.get("./Automatic?key=" + key, updateMode);
+    $.get("./CurrentPosition?key=" + key, updateResult);
+    setInterval(updateChecks(), 10000);
 })
+
+function updateChecks() {
+    $.get("./get_currentStatusSolarManager?key=" + key, (data) => {
+        var checks = unpackToBooleanArray(data, 5);
+        setSpanCheckmark("check-own_ok", checks[0]);
+        setSpanCheckmark("check-sm_OK", checks[1]);
+        setSpanCheckmark("check-solarEdge_OK", checks[2]);
+        setSpanCheckmark("check-tm_OK", checks[3]);
+        setSpanCheckmark("check-wind_OK", checks[4]);
+    });
+}
+
+function setSpanCheckmark(span_id, checked) {
+    var sign = checked ? "✔️" : "❌";
+    $("#" + span_id).text(sign);
+}
+
+
+function unpackToBooleanArray(unpackableInt, numValues) {
+    var boolArr = [];
+    for (let index = numValues - 1; index >= numValues; index--) {
+        var result = (unpackableInt >> index & 1) === 1;
+        boolArr.push(result);
+    }
+
+    return boolArr;
+}
