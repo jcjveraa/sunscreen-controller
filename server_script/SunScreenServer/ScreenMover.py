@@ -26,7 +26,7 @@ def get_current_position() -> int:
     r = requests.get(check_url)
     try:
         json = r.json()
-        position = int(json['position'])
+        position = int(json['position_luifel'])
         post_position_to_adafruit(position)
         return int(position )
     except:
@@ -69,7 +69,7 @@ def set_checks_status(checks):
     r = requests.get(operate_url)
     try:
         print(r.status_code)
-        print(r.json())
+        # print(r.json())
     except:
         print('Some exception occured in set_checks_status...')
         pass
