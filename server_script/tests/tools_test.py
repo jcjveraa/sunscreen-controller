@@ -10,4 +10,6 @@ class ToolsTest(unittest.TestCase):
         self.assertEqual(binarize_bool_array([True, False]), 2)
         self.assertEqual(binarize_bool_array([False, False]), 0)
         self.assertEqual(binarize_bool_array([True, False, False]), 4)
+        self.assertEqual(binarize_bool_array([False, True, False, False, False]), 8)
+        self.assertEqual(binarize_bool_array([False,True, False, False, True]), 9)
         self.assertNotEqual(binarize_bool_array([True, False]), 0)

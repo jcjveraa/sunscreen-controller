@@ -70,17 +70,18 @@ $(function () {
     }
     $.get("./Automatic?key=" + key, updateMode);
     $.get("./CurrentPosition?key=" + key, updateResult);
-    setInterval(updateChecks(), 10000);
+    updateChecks();
+    setInterval(updateChecks, 10000);
 })
 
 function updateChecks() {
     $.get("./get_currentStatusSolarManager?key=" + key, (data) => {
-        var checks = unpackToBooleanArray(data, 5);
-        setSpanCheckmark("check-own_ok", checks[0]);
+        var checks = unpackToBooleanArray(parseInt(data.currentStatusSolarManager, 10), 5);
+        setSpanCheckmark("check-owm_OK", checks[0]);
         setSpanCheckmark("check-sm_OK", checks[1]);
-        setSpanCheckmark("check-solarEdge_OK", checks[2]);
-        setSpanCheckmark("check-tm_OK", checks[3]);
-        setSpanCheckmark("check-wind_OK", checks[4]);
+        setSpanCheckmark("check-tm_OK", checks[2]);
+        setSpanCheckmark("check-wind_OK", checks[3]);
+        setSpanCheckmark("check-solarEdge_OK", checks[4]);
     });
 }
 
@@ -92,7 +93,7 @@ function setSpanCheckmark(span_id, checked) {
 
 function unpackToBooleanArray(unpackableInt, numValues) {
     var boolArr = [];
-    for (let index = numValues - 1; index >= numValues; index--) {
+    for (let index = numValues - 1; index >= 0; index--) {
         var result = (unpackableInt >> index & 1) === 1;
         boolArr.push(result);
     }

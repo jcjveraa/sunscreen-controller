@@ -34,7 +34,7 @@ boolean movementDirection;
 boolean automaticModeEnabled_luifel = false;
 boolean automaticModeEnabled_screen = false;
 
-long currentStatusSolarManager = -1;
+long currentStatusSolarManager = 0;
 
 File uploadFile;
 
