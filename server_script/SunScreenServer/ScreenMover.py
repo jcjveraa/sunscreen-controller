@@ -30,7 +30,7 @@ def get_current_position() -> int:
         post_position_to_adafruit(position)
         return int(position )
     except:
-        print('Some exception occured...')
+        print('Some exception occured get_current_position...')
         print(r.status_code)
         return 999
 
@@ -53,7 +53,7 @@ def move_sunscreen(percent_open: int):
         print(r.status_code)
         print(r.json())
     except:
-        print('Some exception occured...')
+        print('Some exception occured move_sunscreen...')
         pass
     print(r.status_code)
 
@@ -71,6 +71,6 @@ def set_checks_status(checks):
         print(r.status_code)
         print(r.json())
     except:
-        print('Some exception occured...')
+        print('Some exception occured in set_checks_status...')
         pass
     print(r.status_code)
