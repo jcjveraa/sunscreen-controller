@@ -57,7 +57,7 @@ def move_sunscreen(percent_open: int):
         pass
     print(r.status_code)
 
-def set_checks_status(checks: list[bool]):
+def set_checks_status(checks):
     """Sends a command to the control unit - now via a Get request"""
     secrets = get_secrets()
     operate_url = "http://{}/set_currentStatusSolarManager?checksStatus={}&key={}"
