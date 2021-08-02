@@ -13,3 +13,6 @@
 
 // #define LON "1.1234"
 // #define LAT "1.1234"
+
+// #define TRANSMITTERID1 34107862 // Randomly chosen
+// #define TRANSMITTERID2 26723912 // Randomly chosen

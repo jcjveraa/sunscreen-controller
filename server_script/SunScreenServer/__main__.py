@@ -1,6 +1,4 @@
 import argparse
-import math
-import traceback
 from datetime import datetime
 import os
 
@@ -10,7 +8,7 @@ from SunScreenServer.SolarEdgeManager import theoretical_solar_output
 
 from . import OpenPosCalc, OpenWeatherManager, SunManager, TimeManager
 from .GetSecrets import append_json, get_secrets, write_json
-from .ScreenMover import move_sunscreen
+from .ScreenMover import move_sunscreen, set_checks_status
 
 
 def main():
@@ -29,6 +27,8 @@ def main():
         wind_OK = not Windmanager.screen_should_close()
         solarEdge_OK = not SolarEdgeManager.screen_should_close(outside_temp_celcius)
         checks = [owm_OK, sm_OK, tm_OK, wind_OK, solarEdge_OK]
+        set_checks_status(checks)
+
         print(checks)
         check_dict = OpenWeatherManager.check_list(onecall)
         check_dict['sunmgr'] = not sm_OK

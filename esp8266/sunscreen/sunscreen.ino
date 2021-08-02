@@ -10,7 +10,7 @@
 
 // using https://github.com/vdwel/switchKaKu
 #include <switchKaKu.h>
-#define TRANSMITTERID1 34107862 // Randomly chosen
+
 #define KAKUPIN D6
 #define LED_PIN D4
 
@@ -21,15 +21,20 @@ ESP8266HTTPUpdateServer httpUpdater;
 
 // const static String openWeatherAPI = "https://api.openweathermap.org/data/2.5/onecall?lat=" + String(LAT) + "&lon=" + String(LON) + "&appid=" + String(OPENWEATHERMAP_ORG_KEY);
 
-unsigned long lastPositionChangeTimestamp = 0;
+unsigned long lastPositionChangeTimestamp_luifel = 0;
+unsigned long lastPositionChangeTimestamp_screen = 0;
 unsigned long lastControllerContactMillis = 0;
-byte currentPercentageOpen = 0;
+byte currentPercentageOpen_luifel = 0;
+byte currentPercentageOpen_screen = 0;
 
-boolean moving = false;
+boolean moving_luifel = false;
 unsigned long stopMoveTime;
 boolean movementDirection;
 
-boolean automaticModeEnabled = false;
+boolean automaticModeEnabled_luifel = false;
+boolean automaticModeEnabled_screen = false;
+
+long currentStatusSolarManager = 0;
 
 File uploadFile;
 
@@ -73,12 +78,20 @@ void setup()
     server.on("/OperateManual", handleOpenCloseManual);
     server.on("/CurrentPosition", handleGetCurrentPosition);
 
+    server.on("/Operate_screen", handleOpenCloseAutomatic_screen);
+
     server.on("/Automatic", HTTP_GET, handleGetAutomaticMode);
     server.on("/Automatic", HTTP_POST, handleToggleAutomaticMode);
+    server.on("/Automatic_screen", HTTP_POST, handleToggleAutomaticMode_screen);
+
+    server.on("/set_currentStatusSolarManager", HTTP_GET, handleUpdateStatus);
+    server.on("/get_currentStatusSolarManager", HTTP_GET, handleGetStatus);
 
     server.on("/files", HTTP_GET, handleFileList);
     server.on(
-        "/files", HTTP_POST, [] { server.send(200, "application/json", "{\"fileupload\":1}"); }, handleFileUpload);
+        "/files", HTTP_POST, []
+        { server.send(200, "application/json", "{\"fileupload\":1}"); },
+        handleFileUpload);
 
     server.begin(); // Actually start the server
 
@@ -90,7 +103,7 @@ void setup()
 void loop()
 {
     failSafe();
-    if (moving)
+    if (moving_luifel)
     {
         manageMovement();
     }
@@ -107,42 +120,52 @@ void failSafe()
         lastControllerContactMillis = millis();
     }
 
-    if (millis() > (lastControllerContactMillis + TIMEOUT) && currentPercentageOpen > 0)
+    if (millis() > (lastControllerContactMillis + TIMEOUT) && currentPercentageOpen_luifel > 0)
     {
         switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, false, 3);
-        currentPercentageOpen = 0;
+        currentPercentageOpen_luifel = 0;
     }
 }
 
 void manageMovement()
 {
-    // check the current time vs the moment we are supposed to stop moving
+    // check the current time vs the moment we are supposed to stop moving_luifel
     if (millis() >= stopMoveTime)
     {
         // Stop the move
         switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, movementDirection, 3);
-        moving = false;
+        moving_luifel = false;
     }
 }
 
 void handleGetAutomaticMode()
 {
-    const char *autoMode = automaticModeEnabled ? "true" : "false";
-    server.send(200, "application/json", "{\"automatic_mode\":\"" + String(autoMode) + "\"}");
+    const char *autoMode_l = automaticModeEnabled_luifel ? "true" : "false";
+    const char *autoMode_s = automaticModeEnabled_screen ? "true" : "false";
+    server.send(200, "application/json", "{\"automatic_mode\":\"" + String(autoMode_l) + "\", \"automatic_mode_screen\":\"" + String(autoMode_s) + "\"}");
 }
 
 void handleToggleAutomaticMode()
 {
     if (checkKey())
     {
-        automaticModeEnabled = !automaticModeEnabled;
+        automaticModeEnabled_luifel = !automaticModeEnabled_luifel;
+        handleGetAutomaticMode();
+    }
+}
+
+void handleToggleAutomaticMode_screen()
+{
+    if (checkKey())
+    {
+        automaticModeEnabled_screen = !automaticModeEnabled_screen;
         handleGetAutomaticMode();
     }
 }
 
 void handleOpenCloseAutomatic()
 {
-    if (automaticModeEnabled)
+    if (automaticModeEnabled_luifel)
     {
         handleOpenClose();
     }
@@ -180,11 +203,64 @@ void handleOpenClose()
                 stopMoveTime = millis() + int(1000 * abs(movementTime));
                 // Start the move
                 switchKaku(KAKUPIN, TRANSMITTERID1, 1, 1, movementDirection, 3); //switch group 1, device 1, repeat 3, on
-                moving = true;
+                moving_luifel = true;
 
-                lastPositionChangeTimestamp = server.arg("timestamp").toInt();
-                Serial.print("Setting to position from " + String(currentPercentageOpen) + " to " + server.arg("targetPercentageOpen") + " \n");
-                currentPercentageOpen = targetPercentageOpen;
+                lastPositionChangeTimestamp_luifel = server.arg("timestamp").toInt();
+                Serial.print("Setting luifel to position from " + String(currentPercentageOpen_luifel) + " to " + server.arg("targetPercentageOpen") + " \n");
+                currentPercentageOpen_luifel = targetPercentageOpen;
+                // Send the response
+                handleGetCurrentPosition();
+                // server.send(200, "application/json", "{\"command_received\":\"" + server.arg("targetPercentageOpen") + "\"}");
+            }
+            else
+            {
+                // Send a response indicating that we have not handled the request
+                handleGetCurrentPosition_code(202);
+            }
+        }
+    }
+}
+
+void handleOpenCloseAutomatic_screen()
+{
+    if (automaticModeEnabled_screen)
+    {
+        handleOpenClose_screen();
+    }
+
+    else
+    {
+        server.send(409);
+    }
+}
+
+void handleOpenClose_screen()
+{
+    if (checkKey())
+    {
+        if (checkArg("targetPercentageOpen") && checkArg("timestamp"))
+        {
+            // Although we may not take action, store that the controller made contact.
+            lastControllerContactMillis = millis();
+
+            // currentPositionOpen = server.arg("direction") == "Open";           // Default to the safe 'Close' option
+            byte targetPercentageOpen = byte(server.arg("targetPercentageOpen").toInt());
+            float movementTime = calculateMovementTime(targetPercentageOpen, 45.0);
+            // Serial.println(movementTime + ", absolute value is " + abs(movementTime) );
+
+            // Only move if we move more than one second
+            if (abs(movementTime) > 1)
+            {
+                movementDirection = movementTime > 0;
+                // Calculate how long we should move
+                stopMoveTime = millis() + int(1000 * abs(movementTime));
+                // Start the move
+                switchKaku(KAKUPIN, TRANSMITTERID2, 1, 1, movementDirection, 3); //switch group 1, device 1, repeat 3, on
+                // moving_screen = true; // NOT IMPLEMENTED!!! Screen will just move up and down
+
+                lastPositionChangeTimestamp_screen = server.arg("timestamp").toInt();
+                Serial.print("Setting screen to position from " + String(currentPercentageOpen_screen) + " to " + server.arg("targetPercentageOpen") + " \n");
+                currentPercentageOpen_screen = targetPercentageOpen;
                 // Send the response
                 handleGetCurrentPosition();
                 // server.send(200, "application/json", "{\"command_received\":\"" + server.arg("targetPercentageOpen") + "\"}");
@@ -212,7 +288,7 @@ float calculateMovementTime(byte targetPercentageOpen, float totalOpenTime)
         return 100.0f;
     }
 
-    float deltaMovement = targetPercentageOpen - currentPercentageOpen;
+    float deltaMovement = targetPercentageOpen - currentPercentageOpen_luifel;
     return deltaMovement / 100.0 * totalOpenTime;
 }
 
@@ -222,7 +298,7 @@ void handleGetCurrentPosition()
     // if (checkKey())
     // {
     //     Serial.print("Handling handleGetCurrentPosition()\n");
-    //     server.send(200, "application/json", "{\"position\": \"" + String(currentPercentageOpen) + "\",\"lastPositionChangeTimestamp\": \"" + lastPositionChangeTimestamp + "\"" + "} ");
+    //     server.send(200, "application/json", "{\"position\": \"" + String(currentPercentageOpen_luifel) + "\",\"lastPositionChangeTimestamp_luifel\": \"" + lastPositionChangeTimestamp_luifel + "\"" + "} ");
     // }
 }
 
@@ -232,7 +308,9 @@ void handleGetCurrentPosition_code(int code)
     {
         lastControllerContactMillis = millis();
         Serial.print("Handling handleGetCurrentPosition()\n");
-        server.send(code, "application/json", "{\"position\": \"" + String(currentPercentageOpen) + "\",\"lastPositionChangeTimestamp\": \"" + lastPositionChangeTimestamp + "\"" + "} ");
+        server.send(code, "application/json", "{\"position_luifel\": \"" + String(currentPercentageOpen_luifel) + "\",\"lastPositionChangeTimestamp_luifel\": \"" + lastPositionChangeTimestamp_luifel + "\"" + ", " +
+
+                                                  "\"position_screen\": \"" + String(currentPercentageOpen_screen) + "\",\"lastPositionChangeTimestamp_screen\": \"" + lastPositionChangeTimestamp_screen + "\"" + "} ");
     }
 }
 
@@ -373,4 +451,33 @@ String getContentType(String filename)
     else if (filename.endsWith(".gz"))
         return "application/x-gzip";
     return "text/plain";
+}
+
+void handleUpdateStatus()
+{
+    if (!checkKey())
+    {
+        server.send(500);
+        return;
+    }
+
+    if (!checkArg("checksStatus"))
+    {
+        server.send(500);
+        return;
+    }
+
+    currentStatusSolarManager = server.arg("checksStatus").toInt();
+    server.send(200);
+}
+
+void handleGetStatus()
+{
+    if (checkKey())
+    {
+        server.send(200, "application/json", "{\"currentStatusSolarManager\":\"" + String(currentStatusSolarManager) + "\"}");
+        return;
+    }
+
+    server.send(500);
 }
