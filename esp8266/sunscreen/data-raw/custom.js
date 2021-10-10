@@ -72,6 +72,8 @@ $(function () {
     $.get("./CurrentPosition?key=" + key, updateResult);
     updateChecks();
     setInterval(updateChecks, 10000);
+    var elem = document.querySelector('#the-sun');
+    elem.innerHTML = '<img src="sun.png" class="img-fluid" alt="Sun">';
 })
 
 function updateChecks() {
